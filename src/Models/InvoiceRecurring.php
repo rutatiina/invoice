@@ -133,24 +133,9 @@ class InvoiceRecurring extends Model
         }
     }
 
-    public function debit_account()
-    {
-        return $this->hasOne('Rutatiina\FinancialAccounting\Models\Account', 'id', 'debit');
-    }
-
-    public function credit_account()
-    {
-        return $this->hasOne('Rutatiina\FinancialAccounting\Models\Account', 'id', 'credit');
-    }
-
     public function items()
     {
         return $this->hasMany('Rutatiina\Invoice\Models\InvoiceRecurringItem', 'invoice_recurring_id')->orderBy('id', 'asc');
-    }
-
-    public function ledgers()
-    {
-        return $this->hasMany('Rutatiina\Invoice\Models\InvoiceRecurringLedger', 'invoice_recurring_id')->orderBy('id', 'asc');
     }
 
     public function comments()
@@ -160,20 +145,10 @@ class InvoiceRecurring extends Model
 
     public function contact()
     {
-        return $this->hasOne('Rutatiina\Contact\Models\Contact', 'id', 'debit_contact_id');
+        return $this->hasOne('Rutatiina\Contact\Models\Contact', 'id', 'contact_id');
     }
 
-    public function debit_contact()
-    {
-        return $this->hasOne('Rutatiina\Contact\Models\Contact', 'id', 'debit_contact_id');
-    }
-
-    public function credit_contact()
-    {
-        return $this->hasOne('Rutatiina\Contact\Models\Contact', 'id', 'credit_contact_id');
-    }
-
-    public function recurring()
+    public function properties()
     {
         return $this->hasOne('Rutatiina\Invoice\Models\InvoiceRecurringProperty', 'invoice_recurring_id', 'id');
     }

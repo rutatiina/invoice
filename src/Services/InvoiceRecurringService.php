@@ -7,8 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Rutatiina\Invoice\Models\InvoiceRecurring;
-use Rutatiina\FinancialAccounting\Services\AccountBalanceUpdateService;
-use Rutatiina\FinancialAccounting\Services\ContactBalanceUpdateService;
 use Rutatiina\Tax\Models\Tax;
 
 class InvoiceRecurringService
@@ -87,16 +85,8 @@ class InvoiceRecurringService
             $Txn = new InvoiceRecurring;
             $Txn->tenant_id = $data['tenant_id'];
             $Txn->created_by = Auth::id();
-            $Txn->document_name = $data['document_name'];
-            $Txn->number_prefix = $data['number_prefix'];
-            $Txn->number = $data['number'];
-            $Txn->number_length = $data['number_length'];
-            $Txn->number_postfix = $data['number_postfix'];
-            $Txn->date = $data['date'];
-            $Txn->debit_financial_account_code = $data['debit_financial_account_code'];
-            $Txn->credit_financial_account_code = $data['credit_financial_account_code'];
-            $Txn->debit_contact_id = $data['debit_contact_id'];
-            $Txn->credit_contact_id = $data['credit_contact_id'];
+            $Txn->profile_name = $data['profile_name'];
+            $Txn->contact_id = $data['contact_id'];
             $Txn->contact_name = $data['contact_name'];
             $Txn->contact_address = $data['contact_address'];
             $Txn->reference = $data['reference'];
@@ -107,7 +97,8 @@ class InvoiceRecurringService
             $Txn->total = $data['total'];
             $Txn->branch_id = $data['branch_id'];
             $Txn->store_id = $data['store_id'];
-            $Txn->due_date = $data['due_date'];
+            $Txn->start_date = $data['recurring']['start_date'];
+            $Txn->end_date = $data['recurring']['end_date'];
             $Txn->contact_notes = $data['contact_notes'];
             $Txn->terms_and_conditions = $data['terms_and_conditions'];
             $Txn->status = $data['status'];
@@ -121,11 +112,7 @@ class InvoiceRecurringService
             //Save the items >> $data['items']
             InvoiceRecurringItemService::store($data);
 
-            //Save the ledgers >> $data['ledgers']; and update the balances
-            //NOTE >> no need to update ledgers since this is not an accounting entry
-
-            //check status and update financial account and contact balances accordingly
-            InvoiceRecurringApprovalService::run($data);
+            InvoiceRecurringPropertyService::store($data);
 
             DB::connection('tenant')->commit();
 
@@ -182,29 +169,15 @@ class InvoiceRecurringService
             }
 
             //Delete affected relations
-            $Txn->ledgers()->delete();
+            $Txn->properties()->delete();
             $Txn->items()->delete();
             $Txn->item_taxes()->delete();
             $Txn->comments()->delete();
 
-            //reverse the account balances
-            AccountBalanceUpdateService::doubleEntry($Txn->ledgers->toArray(), true);
-
-            //reverse the contact balances
-            ContactBalanceUpdateService::doubleEntry($Txn->ledgers->toArray(), true);
-
             $Txn->tenant_id = $data['tenant_id'];
             $Txn->created_by = Auth::id();
-            $Txn->document_name = $data['document_name'];
-            $Txn->number_prefix = $data['number_prefix'];
-            $Txn->number = $data['number'];
-            $Txn->number_length = $data['number_length'];
-            $Txn->number_postfix = $data['number_postfix'];
-            $Txn->date = $data['date'];
-            $Txn->debit_financial_account_code = $data['debit_financial_account_code'];
-            $Txn->credit_financial_account_code = $data['credit_financial_account_code'];
-            $Txn->debit_contact_id = $data['debit_contact_id'];
-            $Txn->credit_contact_id = $data['credit_contact_id'];
+            $Txn->profile_name = $data['profile_name'];
+            $Txn->contact_id = $data['contact_id'];
             $Txn->contact_name = $data['contact_name'];
             $Txn->contact_address = $data['contact_address'];
             $Txn->reference = $data['reference'];
@@ -215,7 +188,8 @@ class InvoiceRecurringService
             $Txn->total = $data['total'];
             $Txn->branch_id = $data['branch_id'];
             $Txn->store_id = $data['store_id'];
-            $Txn->due_date = $data['due_date'];
+            $Txn->start_date = $data['recurring']['start_date'];
+            $Txn->end_date = $data['recurring']['end_date'];
             $Txn->contact_notes = $data['contact_notes'];
             $Txn->terms_and_conditions = $data['terms_and_conditions'];
             $Txn->status = $data['status'];
@@ -229,8 +203,7 @@ class InvoiceRecurringService
             //Save the items >> $data['items']
             InvoiceRecurringItemService::store($data);
 
-            //check status and update financial account and contact balances accordingly
-            InvoiceRecurringApprovalService::run($data);
+            InvoiceRecurringPropertyService::store($data);
 
             DB::connection('tenant')->commit();
 
@@ -278,16 +251,10 @@ class InvoiceRecurringService
             }
 
             //Delete affected relations
-            $Txn->ledgers()->delete();
+            $Txn->properties()->delete();
             $Txn->items()->delete();
             $Txn->item_taxes()->delete();
             $Txn->comments()->delete();
-
-            //reverse the account balances
-            AccountBalanceUpdateService::doubleEntry($Txn->ledgers, true);
-
-            //reverse the contact balances
-            ContactBalanceUpdateService::doubleEntry($Txn->ledgers, true);
 
             $Txn->delete();
 
@@ -387,8 +354,6 @@ class InvoiceRecurringService
 
         try
         {
-            InvoiceRecurringApprovalService::run($data);
-
             //update the status of the txn
             $Txn->status = 'approved';
             $Txn->save();

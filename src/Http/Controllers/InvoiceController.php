@@ -2,20 +2,17 @@
 
 namespace Rutatiina\Invoice\Http\Controllers;
 
-use Rutatiina\Invoice\Models\Setting;
 use Rutatiina\Invoice\Services\InvoiceService;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Request as FacadesRequest;
-use Illuminate\Support\Facades\View;
 use Rutatiina\Invoice\Models\Invoice;
 use Rutatiina\Item\Traits\ItemsSelect2DataTrait;
 use Rutatiina\Contact\Traits\ContactTrait;
 use Yajra\DataTables\Facades\DataTables;
 
-//controller not in use
 class InvoiceController extends Controller
 {
     use ContactTrait;
@@ -167,17 +164,12 @@ class InvoiceController extends Controller
 
         $txnAttributes = InvoiceService::edit($id);
 
-        $data = [
+        return [
             'pageTitle' => 'Edit Invoice', #required
             'pageAction' => 'Edit', #required
             'txnUrlStore' => '/invoices/' . $id, #required
             'txnAttributes' => $txnAttributes, #required
         ];
-
-        if (FacadesRequest::wantsJson())
-        {
-            return $data;
-        }
     }
 
     public function update(Request $request)
@@ -254,14 +246,12 @@ class InvoiceController extends Controller
 
         $txnAttributes = InvoiceService::copy($id);
 
-        $data = [
+        return [
             'pageTitle' => 'Copy Invoices', #required
             'pageAction' => 'Copy', #required
             'txnUrlStore' => '/invoices', #required
             'txnAttributes' => $txnAttributes, #required
         ];
-
-        return $data;
     }
 
     public function datatables(Request $request)

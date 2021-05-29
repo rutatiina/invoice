@@ -2,53 +2,47 @@
 
 namespace Rutatiina\Invoice\Http\Controllers;
 
-use Rutatiina\Invoice\Models\InvoiceRecurringSetting;
-use URL;
+use Rutatiina\Invoice\Services\InvoiceRecurringService;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Request as FacadesRequest;
-use Illuminate\Support\Facades\View;
 use Rutatiina\Invoice\Models\InvoiceRecurring;
 use Rutatiina\Contact\Traits\ContactTrait;
 use Rutatiina\FinancialAccounting\Traits\FinancialAccountingTrait;
 use Yajra\DataTables\Facades\DataTables;
 
-use Rutatiina\Invoice\Classes\Recurring\Store as TxnStore;
-use Rutatiina\Invoice\Classes\Recurring\Approve as TxnApprove;
-use Rutatiina\Invoice\Classes\Recurring\Read as TxnRead;
-use Rutatiina\Invoice\Classes\Recurring\Copy as TxnCopy;
-use Rutatiina\Invoice\Traits\Recurring\Item as TxnItem;
-use Rutatiina\Invoice\Classes\Recurring\Edit as TxnEdit;
-use Rutatiina\Invoice\Classes\Recurring\Update as TxnUpdate;
-
 class InvoiceRecurringController extends Controller
 {
     use FinancialAccountingTrait;
     use ContactTrait;
-    use TxnItem; // >> get the item attributes template << !!important
+
+    // >> get the item attributes template << !!important
 
     public function __construct()
     {
         $this->middleware('permission:recurring-invoices.view');
-		$this->middleware('permission:recurring-invoices.create', ['only' => ['create','store']]);
-		$this->middleware('permission:recurring-invoices.update', ['only' => ['edit','update']]);
-		$this->middleware('permission:recurring-invoices.delete', ['only' => ['destroy']]);
+        $this->middleware('permission:recurring-invoices.create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:recurring-invoices.update', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:recurring-invoices.delete', ['only' => ['destroy']]);
     }
 
     public function index(Request $request)
     {
         //load the vue version of the app
-        if (!FacadesRequest::wantsJson()) {
+        if (!FacadesRequest::wantsJson())
+        {
             return view('l-limitless-bs4.layout_2-ltr-default.appVue');
         }
 
         $query = InvoiceRecurring::query();
-        $query->with('recurring');
+        $query->with('properties');
 
         if ($request->contact)
         {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request)
+            {
                 $q->where('debit_contact_id', $request->contact);
                 $q->orWhere('credit_contact_id', $request->contact);
             });
@@ -61,18 +55,11 @@ class InvoiceRecurringController extends Controller
         ];
     }
 
-    private function nextNumber()
-    {
-        $txn = InvoiceRecurring::latest()->first();
-        $settings = InvoiceRecurringSetting::first();
-
-        return $settings->number_prefix.(str_pad((optional($txn)->number+1), $settings->minimum_number_length, "0", STR_PAD_LEFT)).$settings->number_postfix;
-    }
-
     public function create()
     {
         //load the vue version of the app
-        if (!FacadesRequest::wantsJson()) {
+        if (!FacadesRequest::wantsJson())
+        {
             return view('l-limitless-bs4.layout_2-ltr-default.appVue');
         }
 
@@ -80,9 +67,7 @@ class InvoiceRecurringController extends Controller
 
         $txnAttributes = (new InvoiceRecurring)->rgGetAttributes();
 
-        $txnAttributes['number'] = $this->nextNumber();
-
-        $txnAttributes['status'] = 'Approved';
+        $txnAttributes['status'] = 'approved';
         $txnAttributes['contact_id'] = '';
         $txnAttributes['contact'] = json_decode('{"currencies":[]}'); #required
         $txnAttributes['date'] = date('Y-m-d');
@@ -102,7 +87,27 @@ class InvoiceRecurringController extends Controller
         ];
         $txnAttributes['contact_notes'] = null;
         $txnAttributes['terms_and_conditions'] = null;
-        $txnAttributes['items'] = [$this->itemCreate()];
+        $txnAttributes['items'] = [
+            [
+                'selectedTaxes' => [], #required
+                'selectedItem' => json_decode('{}'), #required
+                'displayTotal' => 0,
+                'name' => '',
+                'description' => '',
+                'rate' => 0,
+                'quantity' => 1,
+                'total' => 0,
+                'taxes' => [],
+
+                'type' => '',
+                'type_id' => '',
+                'contact_id' => '',
+                'tax_id' => '',
+                'units' => '',
+                'batch' => '',
+                'expiry' => ''
+            ]
+        ];
 
         unset($txnAttributes['txn_entree_id']); //!important
         unset($txnAttributes['txn_type_id']); //!important
@@ -120,25 +125,24 @@ class InvoiceRecurringController extends Controller
     }
 
     public function store(Request $request)
-	{
-	    //return $request;
+    {
+        //return $request;
 
-        $TxnStore = new TxnStore();
-        $TxnStore->txnInsertData = $request->all();
-        $insert = $TxnStore->run();
+        $storeService = InvoiceRecurringService::store($request);
 
-        if ($insert == false) {
+        if ($storeService == false)
+        {
             return [
-                'status'    => false,
-                'messages'   => $TxnStore->errors
+                'status' => false,
+                'messages' => InvoiceRecurringService::$errors
             ];
         }
 
         return [
-            'status'    => true,
-            'messages'   => ['Recurring Invoice saved'],
-            'number'    => 0,
-            'callback'  => URL::route('recurring-invoices.show', [$insert->id], false)
+            'status' => true,
+            'messages' => ['Recurring Invoice saved'],
+            'number' => 0,
+            'callback' => URL::route('recurring-invoices.show', [$storeService->id], false)
         ];
 
     }
@@ -146,95 +150,99 @@ class InvoiceRecurringController extends Controller
     public function show($id)
     {
         //load the vue version of the app
-        if (!FacadesRequest::wantsJson()) {
+        if (!FacadesRequest::wantsJson())
+        {
             return view('l-limitless-bs4.layout_2-ltr-default.appVue');
         }
 
-        if (FacadesRequest::wantsJson()) {
-            $TxnRead = new TxnRead();
-            return $TxnRead->run($id);
-        }
+        $txn = InvoiceRecurring::findOrFail($id);
+        $txn->load('contact', 'properties', 'items.taxes');
+        $txn->setAppends([
+            'taxes',
+            'number_string',
+            'total_in_words',
+        ]);
+
+        return $txn->toArray();
     }
 
     public function edit($id)
     {
         //load the vue version of the app
-        if (!FacadesRequest::wantsJson()) {
+        if (!FacadesRequest::wantsJson())
+        {
             return view('l-limitless-bs4.layout_2-ltr-default.appVue');
         }
 
-        $TxnEdit = new TxnEdit();
-        $txnAttributes = $TxnEdit->run($id);
+        $txnAttributes = InvoiceRecurringService::edit($id);
 
-        $data = [
+        return [
             'pageTitle' => 'Edit Recurring Invoice', #required
             'pageAction' => 'Edit', #required
-            'txnUrlStore' => '/recurring-invoices/'.$id, #required
+            'txnUrlStore' => '/recurring-invoices/' . $id, #required
             'txnAttributes' => $txnAttributes, #required
         ];
-
-        if (FacadesRequest::wantsJson()) {
-            return $data;
-        }
     }
 
     public function update(Request $request)
     {
         //print_r($request->all()); exit;
 
-        $TxnStore = new TxnUpdate();
-        $TxnStore->txnInsertData = $request->all();
-        $insert = $TxnStore->run();
+        $updateService = InvoiceRecurringService::update($request);
 
-        if ($insert == false) {
+        if ($updateService == false)
+        {
             return [
-                'status'    => false,
-                'messages'  => $TxnStore->errors
+                'status' => false,
+                'messages' => InvoiceRecurringService::$errors
             ];
         }
 
         return [
-            'status'    => true,
-            'messages'  => ['Recurring Invoice updated'],
-            'number'    => 0,
-            'callback'  => URL::route('recurring-invoices.show', [$insert->id], false)
+            'status' => true,
+            'messages' => ['Recurring Invoice updated'],
+            'number' => 0,
+            'callback' => URL::route('recurring-invoices.show', [$updateService->id], false)
         ];
     }
 
     public function destroy($id)
-	{
-		$delete = Transaction::delete($id);
+    {
+        $destroy = InvoiceRecurringService::destroy($id);
 
-		if ($delete) {
-			return [
-				'status' => true,
-				'message' => 'Recurring Invoice deleted',
-			];
-		} else {
-			return [
-				'status' => false,
-				'message' => implode('<br>', array_values(Transaction::$rg_errors))
-			];
-		}
-	}
+        if ($destroy)
+        {
+            return [
+                'status' => true,
+                'messages' => 'Recurring Invoice deleted',
+            ];
+        }
+        else
+        {
+            return [
+                'status' => false,
+                'messages' => InvoiceRecurringService::$errors
+            ];
+        }
+    }
 
-	#-----------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------
 
     public function approve($id)
     {
-        $TxnApprove = new TxnApprove();
-        $approve = $TxnApprove->run($id);
+        $approve = InvoiceRecurringService::approve($id);
 
-        if ($approve == false) {
+        if ($approve == false)
+        {
             return [
-                'status'    => false,
-                'messages'   => $TxnApprove->errors
+                'status' => false,
+                'messages' => InvoiceRecurringService::$errors
             ];
         }
 
         return [
-            'status'    => true,
-            'messages'   => ['Recurring Invoice Approved'],
+            'status' => true,
+            'messages' => ['Recurring Invoice Approved'],
         ];
 
     }
@@ -242,35 +250,28 @@ class InvoiceRecurringController extends Controller
     public function copy($id)
     {
         //load the vue version of the app
-        if (!FacadesRequest::wantsJson()) {
+        if (!FacadesRequest::wantsJson())
+        {
             return view('l-limitless-bs4.layout_2-ltr-default.appVue');
         }
 
-        $TxnCopy = new TxnCopy();
-        $txnAttributes = $TxnCopy->run($id);
+        $txnAttributes = InvoiceRecurringService::copy($id);
 
-        $txnAttributes['number'] = $this->nextNumber();
-
-
-        $data = [
-            'pageTitle' => 'Copy Recurring Invoice', #required
+        return [
+            'pageTitle' => 'Copy Invoices', #required
             'pageAction' => 'Copy', #required
-            'txnUrlStore' => '/accounting/sales/recurring-invoices', #required
+            'txnUrlStore' => '/invoices', #required
             'txnAttributes' => $txnAttributes, #required
         ];
-
-        if (FacadesRequest::wantsJson()) {
-            return $data;
-        }
     }
 
     public function datatables(Request $request)
-	{
+    {
         $txns = Transaction::setRoute('show', route('accounting.sales.recurring-invoices.show', '_id_'))
-			->setRoute('edit', route('accounting.sales.recurring-invoices.edit', '_id_'))
-			->setRoute('copy', route('accounting.sales.invoices.copy', '_id_'))
-			->setSortBy($request->sort_by)
-			->paginate(false)
+            ->setRoute('edit', route('accounting.sales.recurring-invoices.edit', '_id_'))
+            ->setRoute('copy', route('accounting.sales.invoices.copy', '_id_'))
+            ->setSortBy($request->sort_by)
+            ->paginate(false)
             ->returnModel(true);
 
         $txns->with('recurring');
@@ -278,7 +279,8 @@ class InvoiceRecurringController extends Controller
         return Datatables::of($txns)->make(true);
     }
 
-    public function exportToExcel(Request $request) {
+    public function exportToExcel(Request $request)
+    {
 
         $txns = collect([]);
 
@@ -290,7 +292,8 @@ class InvoiceRecurringController extends Controller
             ' ', //Currency
         ]);
 
-        foreach (array_reverse($request->ids) as $id) {
+        foreach (array_reverse($request->ids) as $id)
+        {
             $txn = Transaction::transaction($id);
 
             $txns->push([
@@ -303,7 +306,7 @@ class InvoiceRecurringController extends Controller
         }
 
         $export = $txns->downloadExcel(
-            'maccounts-recurring-invoices-export-'.date('Y-m-d-H-m-s').'.xlsx',
+            'maccounts-recurring-invoices-export-' . date('Y-m-d-H-m-s') . '.xlsx',
             null,
             false
         );

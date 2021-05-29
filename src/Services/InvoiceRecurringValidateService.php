@@ -28,10 +28,10 @@ class InvoiceRecurringValidateService
         ];
 
         $rules = [
+            'profile_name' => 'required|string|max:250',
             'contact_id' => 'required|numeric',
             'date' => 'required|date',
             'base_currency' => 'required',
-            'due_date' => 'date|nullable',
             'salesperson_contact_id' => 'numeric|nullable',
             'memo' => 'string|nullable',
 
@@ -46,6 +46,13 @@ class InvoiceRecurringValidateService
             'items.*.taxes.*.code' => 'required',
             'items.*.taxes.*.total' => 'required|numeric',
             //'items.*.taxes.*.exclusive' => 'required|numeric',
+
+            'recurring.frequency' => 'required|string',
+            'recurring.start_date' => 'required|date',
+            'recurring.end_date' => 'required|date',
+            'recurring.day_of_month' => 'required|string',
+            'recurring.month' => 'required|string',
+            'recurring.day_of_week' => 'required|string',
         ];
 
         $validator = Validator::make($requestInstance->all(), $rules, $customMessages);
@@ -58,31 +65,15 @@ class InvoiceRecurringValidateService
 
         // << data validation <<------------------------------------------------------------
 
-        $settings = InvoiceRecurringSetting::has('financial_account_to_debit')
-            ->has('financial_account_to_credit')
-            ->with(['financial_account_to_debit', 'financial_account_to_credit'])
-            ->firstOrFail();
-        //Log::info($this->settings);
-
-
         $contact = Contact::findOrFail($requestInstance->contact_id);
-
 
         $data['id'] = $requestInstance->input('id', null); //for updating the id will always be posted
         $data['user_id'] = $user->id;
         $data['tenant_id'] = $user->tenant->id;
         $data['created_by'] = $user->name;
         $data['app'] = 'web';
-        $data['document_name'] = $settings->document_name;
-        $data['number_prefix'] = $settings->number_prefix;
-        $data['number'] = $requestInstance->input('number');
-        $data['number_length'] = $settings->minimum_number_length;
-        $data['number_postfix'] = $settings->number_postfix;
-        $data['date'] = $requestInstance->input('date');
-        $data['debit_financial_account_code'] = $settings->financial_account_to_debit->code;
-        $data['credit_financial_account_code'] = $settings->financial_account_to_credit->code;
-        $data['debit_contact_id'] = $requestInstance->contact_id;
-        $data['credit_contact_id'] = $requestInstance->contact_id;
+        $data['profile_name'] = $requestInstance->input('profile_name');
+        $data['contact_id'] = $requestInstance->contact_id;
         $data['contact_name'] = $contact->name;
         $data['contact_address'] = trim($contact->shipping_address_street1 . ' ' . $contact->shipping_address_street2);
         $data['reference'] = $requestInstance->input('reference', null);
@@ -140,38 +131,8 @@ class InvoiceRecurringValidateService
         $data['taxable_amount'] = $taxableAmount;
         $data['total'] = $txnTotal;
 
+        $data['recurring']  = $requestInstance->input('recurring', []);
 
-        //DR ledger
-        $data['ledgers'][] = [
-            'financial_account_code' => $settings->financial_account_to_debit->code,
-            'effect' => 'debit',
-            'total' => $data['total'],
-            'contact_id' => $data['debit_contact_id']
-        ];
-
-        //CR ledger
-        $data['ledgers'][] = [
-            'financial_account_code' => $settings->financial_account_to_credit->code,
-            'effect' => 'credit',
-            'total' => $data['total'],
-            'contact_id' => $data['credit_contact_id']
-        ];
-
-        //print_r($data); exit;
-
-        //Now add the default values to items and ledgers
-
-        foreach ($data['ledgers'] as &$ledger)
-        {
-            $ledger['tenant_id'] = $data['tenant_id'];
-            $ledger['date'] = date('Y-m-d', strtotime($data['date']));
-            $ledger['base_currency'] = $data['base_currency'];
-            $ledger['quote_currency'] = $data['quote_currency'];
-            $ledger['exchange_rate'] = $data['exchange_rate'];
-        }
-        unset($ledger);
-
-        //Return the array of txns
         //print_r($data); exit;
 
         return $data;
