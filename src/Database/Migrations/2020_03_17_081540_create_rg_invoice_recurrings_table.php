@@ -26,8 +26,6 @@ class CreateRgInvoiceRecurringsTable extends Migration
 
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
-            $table->unsignedBigInteger('parent_id');
-            $table->string('external_key', 100);
             $table->unsignedBigInteger('app_id');
             $table->string('profile_name', 250); //name of the recurring invoice
             $table->unsignedBigInteger('contact_id');
@@ -48,7 +46,6 @@ class CreateRgInvoiceRecurringsTable extends Migration
             $table->string('payment_mode', 50)->nullable();
             $table->string('payment_terms', 100)->nullable();
             $table->string('contact_notes', 250)->nullable();
-            $table->string('external_ref', 250)->nullable();
             $table->string('terms_and_conditions', 250)->nullable();
 
         });

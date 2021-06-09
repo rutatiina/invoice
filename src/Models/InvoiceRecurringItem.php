@@ -46,11 +46,6 @@ class InvoiceRecurringItem extends Model
         }
     }
 
-    public function txn()
-    {
-        return $this->belongsTo('Rutatiina\FinancialAccounting\Models\Txn', 'txn_id');
-    }
-
     public function invoice_recurring()
     {
         return $this->belongsTo('Rutatiina\Invoice\Models\InvoiceRecurring', 'invoice_recurring_id');

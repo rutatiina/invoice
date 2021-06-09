@@ -30,10 +30,9 @@ class InvoiceRecurringValidateService
         $rules = [
             'profile_name' => 'required|string|max:250',
             'contact_id' => 'required|numeric',
-            'date' => 'required|date',
             'base_currency' => 'required',
             'salesperson_contact_id' => 'numeric|nullable',
-            'memo' => 'string|nullable',
+            'customer_notes' => 'string|nullable',
 
             'items' => 'required|array',
             'items.*.name' => 'required_without:type_id',

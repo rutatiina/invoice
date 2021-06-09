@@ -34,7 +34,7 @@ class InvoiceRecurringItemService
                 $itemTax = new InvoiceRecurringItemTax;
                 $itemTax->tenant_id = $item['tenant_id'];
                 $itemTax->invoice_recurring_id = $item['invoice_recurring_id'];
-                $itemTax->retainer_invoice_item_id = $itemModel->id;
+                $itemTax->invoice_recurring_item_id = $itemModel->id;
                 $itemTax->tax_code = $tax['code'];
                 $itemTax->amount = $tax['total'];
                 $itemTax->inclusive = $tax['inclusive'];

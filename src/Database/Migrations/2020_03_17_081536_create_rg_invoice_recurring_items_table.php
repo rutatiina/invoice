@@ -27,7 +27,6 @@ class CreateRgInvoiceRecurringItemsTable extends Migration
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
             $table->unsignedBigInteger('invoice_recurring_id');
-            $table->enum('type', ['item', 'contact', 'account', 'txn_type', 'txn', 'tax'])->nullable();
             $table->unsignedBigInteger('type_id')->nullable();
             $table->unsignedBigInteger('contact_id')->nullable();
             $table->string('name', 100);
