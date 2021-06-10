@@ -19,7 +19,7 @@ class InvoiceLedgersService
     {
         foreach ($data['ledgers'] as &$ledger)
         {
-            $ledger['retainer_invoice_id'] = $data['id'];
+            $ledger['invoice_id'] = $data['id'];
             InvoiceLedger::create($ledger);
         }
         unset($ledger);

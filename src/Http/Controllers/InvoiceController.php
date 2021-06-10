@@ -104,15 +104,12 @@ class InvoiceController extends Controller
         unset($txnAttributes['debit_contact_id']); //!important
         unset($txnAttributes['credit_contact_id']); //!important
 
-        $data = [
+        return [
             'pageTitle' => 'Create Invoice', #required
             'pageAction' => 'Create', #required
             'txnUrlStore' => '/invoices', #required
             'txnAttributes' => $txnAttributes, #required
         ];
-
-        return $data;
-
     }
 
     public function store(Request $request)

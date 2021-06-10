@@ -9,17 +9,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Request as FacadesRequest;
 use Rutatiina\Invoice\Models\InvoiceRecurring;
-use Rutatiina\Contact\Traits\ContactTrait;
-use Rutatiina\FinancialAccounting\Traits\FinancialAccountingTrait;
-use Yajra\DataTables\Facades\DataTables;
 
 class InvoiceRecurringController extends Controller
 {
-    use FinancialAccountingTrait;
-    use ContactTrait;
-
-    // >> get the item attributes template << !!important
-
     public function __construct()
     {
         $this->middleware('permission:recurring-invoices.view');
@@ -263,57 +255,6 @@ class InvoiceRecurringController extends Controller
             'txnUrlStore' => '/invoices', #required
             'txnAttributes' => $txnAttributes, #required
         ];
-    }
-
-    public function datatables(Request $request)
-    {
-        $txns = Transaction::setRoute('show', route('accounting.sales.recurring-invoices.show', '_id_'))
-            ->setRoute('edit', route('accounting.sales.recurring-invoices.edit', '_id_'))
-            ->setRoute('copy', route('accounting.sales.invoices.copy', '_id_'))
-            ->setSortBy($request->sort_by)
-            ->paginate(false)
-            ->returnModel(true);
-
-        $txns->with('recurring');
-
-        return Datatables::of($txns)->make(true);
-    }
-
-    public function exportToExcel(Request $request)
-    {
-
-        $txns = collect([]);
-
-        $txns->push([
-            'DATE',
-            'REFERENCE',
-            'CUSTOMER',
-            'TOTAL',
-            ' ', //Currency
-        ]);
-
-        foreach (array_reverse($request->ids) as $id)
-        {
-            $txn = Transaction::transaction($id);
-
-            $txns->push([
-                $txn->date,
-                $txn->reference,
-                $txn->contact_name,
-                $txn->total,
-                $txn->base_currency,
-            ]);
-        }
-
-        $export = $txns->downloadExcel(
-            'maccounts-recurring-invoices-export-' . date('Y-m-d-H-m-s') . '.xlsx',
-            null,
-            false
-        );
-
-        //$books->load('author', 'publisher'); //of no use
-
-        return $export;
     }
 
 }
