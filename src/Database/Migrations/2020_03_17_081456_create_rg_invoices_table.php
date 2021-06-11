@@ -46,7 +46,7 @@ class CreateRgInvoicesTable extends Migration
             $table->unsignedDecimal('taxable_amount', 20,5);
             $table->unsignedDecimal('total', 20, 5);
             $table->unsignedDecimal('total_paid', 20, 5)->default(0);
-            $table->boolean('balances_where_updated', 20, 5)->default(0);
+            $table->boolean('balances_where_updated')->default(0);
             $table->unsignedDecimal('discount_amount', 20, 5)->nullable();
             $table->unsignedBigInteger('branch_id')->nullable();
             $table->unsignedBigInteger('store_id')->nullable();
