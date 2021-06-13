@@ -24,7 +24,7 @@ class InvoiceRecurringService
 
         $txn = InvoiceRecurring::findOrFail($id);
         $txn->load('contact', 'items.taxes');
-        $txn->setAppends(['taxes']);
+        $txn->setAppends(['taxes', 'date_range', 'is_recurring']);
 
         $attributes = $txn->toArray();
 
@@ -32,7 +32,6 @@ class InvoiceRecurringService
 
         $attributes['_method'] = 'PATCH';
 
-        $attributes['contact_id'] = $attributes['debit_contact_id'];
         $attributes['contact']['currency'] = $attributes['contact']['currency_and_exchange_rate'];
         $attributes['contact']['currencies'] = $attributes['contact']['currencies_and_exchange_rates'];
 
@@ -96,11 +95,16 @@ class InvoiceRecurringService
             $Txn->total = $data['total'];
             $Txn->branch_id = $data['branch_id'];
             $Txn->store_id = $data['store_id'];
-            $Txn->start_date = $data['recurring']['start_date'];
-            $Txn->end_date = $data['recurring']['end_date'];
             $Txn->contact_notes = $data['contact_notes'];
             $Txn->terms_and_conditions = $data['terms_and_conditions'];
+
             $Txn->status = $data['status'];
+            $Txn->frequency = $data['frequency'];
+            $Txn->start_date = $data['start_date'];
+            $Txn->end_date = $data['end_date'];
+            $Txn->cron_day_of_month = $data['cron_day_of_month'];
+            $Txn->cron_month = $data['cron_month'];
+            $Txn->cron_day_of_week = $data['cron_day_of_week'];
 
             $Txn->save();
 
@@ -122,20 +126,20 @@ class InvoiceRecurringService
         {
             DB::connection('tenant')->rollBack();
 
-            Log::critical('Fatal Internal Error: Failed to save estimate to database');
+            Log::critical('Fatal Internal Error: Failed to save recurring invoice to database');
             Log::critical($e);
 
             //print_r($e); exit;
             if (App::environment('local'))
             {
-                self::$errors[] = 'Error: Failed to save estimate to database.';
+                self::$errors[] = 'Error: Failed to save recurring invoice to database.';
                 self::$errors[] = 'File: ' . $e->getFile();
                 self::$errors[] = 'Line: ' . $e->getLine();
                 self::$errors[] = 'Message: ' . $e->getMessage();
             }
             else
             {
-                self::$errors[] = 'Fatal Internal Error: Failed to save estimate to database. Please contact Admin';
+                self::$errors[] = 'Fatal Internal Error: Failed to save recurring invoice to database. Please contact Admin';
             }
 
             return false;
@@ -168,7 +172,6 @@ class InvoiceRecurringService
             }
 
             //Delete affected relations
-            $Txn->properties()->delete();
             $Txn->items()->delete();
             $Txn->item_taxes()->delete();
             $Txn->comments()->delete();
@@ -186,11 +189,16 @@ class InvoiceRecurringService
             $Txn->total = $data['total'];
             $Txn->branch_id = $data['branch_id'];
             $Txn->store_id = $data['store_id'];
-            $Txn->start_date = $data['recurring']['start_date'];
-            $Txn->end_date = $data['recurring']['end_date'];
             $Txn->contact_notes = $data['contact_notes'];
             $Txn->terms_and_conditions = $data['terms_and_conditions'];
+
             $Txn->status = $data['status'];
+            $Txn->frequency = $data['frequency'];
+            $Txn->start_date = $data['start_date'];
+            $Txn->end_date = $data['end_date'];
+            $Txn->cron_day_of_month = $data['cron_day_of_month'];
+            $Txn->cron_month = $data['cron_month'];
+            $Txn->cron_day_of_week = $data['cron_day_of_week'];
 
             $Txn->save();
 
@@ -212,20 +220,20 @@ class InvoiceRecurringService
         {
             DB::connection('tenant')->rollBack();
 
-            Log::critical('Fatal Internal Error: Failed to update estimate in database');
+            Log::critical('Fatal Internal Error: Failed to update recurring invoice in database');
             Log::critical($e);
 
             //print_r($e); exit;
             if (App::environment('local'))
             {
-                self::$errors[] = 'Error: Failed to update estimate in database.';
+                self::$errors[] = 'Error: Failed to update recurring invoice in database.';
                 self::$errors[] = 'File: ' . $e->getFile();
                 self::$errors[] = 'Line: ' . $e->getLine();
                 self::$errors[] = 'Message: ' . $e->getMessage();
             }
             else
             {
-                self::$errors[] = 'Fatal Internal Error: Failed to update estimate in database. Please contact Admin';
+                self::$errors[] = 'Fatal Internal Error: Failed to update recurring invoice in database. Please contact Admin';
             }
 
             return false;
@@ -249,7 +257,6 @@ class InvoiceRecurringService
             }
 
             //Delete affected relations
-            $Txn->properties()->delete();
             $Txn->items()->delete();
             $Txn->item_taxes()->delete();
             $Txn->comments()->delete();
@@ -265,20 +272,20 @@ class InvoiceRecurringService
         {
             DB::connection('tenant')->rollBack();
 
-            Log::critical('Fatal Internal Error: Failed to delete estimate from database');
+            Log::critical('Fatal Internal Error: Failed to delete recurring invoice from database');
             Log::critical($e);
 
             //print_r($e); exit;
             if (App::environment('local'))
             {
-                self::$errors[] = 'Error: Failed to delete estimate from database.';
+                self::$errors[] = 'Error: Failed to delete recurring invoice from database.';
                 self::$errors[] = 'File: ' . $e->getFile();
                 self::$errors[] = 'Line: ' . $e->getLine();
                 self::$errors[] = 'Message: ' . $e->getMessage();
             }
             else
             {
-                self::$errors[] = 'Fatal Internal Error: Failed to delete estimate from database. Please contact Admin';
+                self::$errors[] = 'Fatal Internal Error: Failed to delete recurring invoice from database. Please contact Admin';
             }
 
             return false;
@@ -291,20 +298,17 @@ class InvoiceRecurringService
 
         $txn = InvoiceRecurring::findOrFail($id);
         $txn->load('contact', 'items.taxes');
-        $txn->setAppends(['taxes']);
+        $txn->setAppends(['taxes', 'date_range', 'is_recurring']);
 
         $attributes = $txn->toArray();
 
         #reset some values
-        $attributes['date'] = date('Y-m-d');
         $attributes['due_date'] = '';
-        $attributes['expiry_date'] = '';
         #reset some values
 
         $attributes['contact']['currency'] = $attributes['contact']['currency_and_exchange_rate'];
         $attributes['contact']['currencies'] = $attributes['contact']['currencies_and_exchange_rates'];
 
-        $attributes['contact_id'] = $attributes['debit_contact_id'];
         $attributes['taxes'] = json_decode('{}');
 
         foreach ($attributes['items'] as $key => $item)

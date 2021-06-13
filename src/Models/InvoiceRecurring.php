@@ -37,7 +37,8 @@ class InvoiceRecurring extends Model
     protected $appends = [
         'number_string',
         'total_in_words',
-        'contact_id',
+        'date_range',
+        'is_recurring',
     ];
 
     /**
@@ -58,11 +59,7 @@ class InvoiceRecurring extends Model
              $txn->comments()->each(function($row) {
                 $row->delete();
              });
-             $txn->ledgers()->each(function($row) {
-                $row->delete();
-             });
         });
-
     }
 
     public function rgGetAttributes()
@@ -87,15 +84,11 @@ class InvoiceRecurring extends Model
         }
 
         //add the relationships
-        $attributes['type'] = [];
-        $attributes['debit_account'] = [];
-        $attributes['credit_account'] = [];
+        $attributes['is_recurring'] = true; //used by vue for displaying recurring form options
+        $attributes['date_range'] = []; //used by vue for the recurring date range
         $attributes['items'] = [];
-        $attributes['ledgers'] = [];
         $attributes['comments'] = [];
-        $attributes['debit_contact'] = [];
-        $attributes['credit_contact'] = [];
-        $attributes['recurring'] = [];
+        $attributes['contact'] = [];
 
         return $attributes;
     }
@@ -121,16 +114,14 @@ class InvoiceRecurring extends Model
         return ucfirst($f->format($this->total));
     }
 
-    public function getContactIdAttribute()
+    public function getIsRecurringAttribute()
     {
-        if ($this->debit_contact_id == $this->credit_contact_id)
-        {
-            return $this->debit_contact_id;
-        }
-        else
-        {
-            return null;
-        }
+        return true;
+    }
+
+    public function getDateRangeAttribute()
+    {
+        return [$this->start_date, $this->end_date];
     }
 
     public function items()
@@ -146,11 +137,6 @@ class InvoiceRecurring extends Model
     public function contact()
     {
         return $this->hasOne('Rutatiina\Contact\Models\Contact', 'id', 'contact_id');
-    }
-
-    public function properties()
-    {
-        return $this->hasOne('Rutatiina\Invoice\Models\InvoiceRecurringProperty', 'invoice_recurring_id', 'id');
     }
 
     public function item_taxes()

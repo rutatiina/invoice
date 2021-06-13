@@ -39,12 +39,21 @@ class CreateRgInvoiceRecurringsTable extends Migration
             $table->unsignedDecimal('total', 20, 5);
             $table->unsignedBigInteger('branch_id')->nullable();
             $table->unsignedBigInteger('store_id')->nullable();
-            $table->date('start_date')->nullable(); //date when the recurring starts
-            $table->date('end_date')->nullable(); //date when the recurring ends
-            $table->string('status', 20)->nullable();
             $table->unsignedBigInteger('salesperson_id')->nullable();
             $table->string('payment_mode', 50)->nullable();
             $table->string('payment_terms', 100)->nullable();
+
+            //>> recurring details columns
+            $table->string('status', 20)->nullable(); //active | paused | de-active
+            $table->string('frequency', 50)->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->string('cron_day_of_month', 10)->nullable();
+            $table->string('cron_month', 10)->nullable();
+            $table->string('cron_day_of_week', 10)->nullable();
+            $table->dateTime('last_run')->nullable()->comment('date time of last run');
+            $table->dateTime('next_run')->nullable()->comment('date time of next run');
+
             $table->string('contact_notes', 250)->nullable();
             $table->string('terms_and_conditions', 250)->nullable();
 
