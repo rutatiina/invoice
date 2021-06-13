@@ -115,8 +115,6 @@ class InvoiceRecurringService
             //Save the items >> $data['items']
             InvoiceRecurringItemService::store($data);
 
-            InvoiceRecurringPropertyService::store($data);
-
             DB::connection('tenant')->commit();
 
             return $Txn;
@@ -208,8 +206,6 @@ class InvoiceRecurringService
 
             //Save the items >> $data['items']
             InvoiceRecurringItemService::store($data);
-
-            InvoiceRecurringPropertyService::store($data);
 
             DB::connection('tenant')->commit();
 
