@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRgInvoiceRecurringCommentsTable extends Migration
+class CreateRgRecurringInvoiceCommentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateRgInvoiceRecurringCommentsTable extends Migration
      */
     public function up()
     {
-        Schema::connection('tenant')->create('rg_invoice_recurring_comments', function (Blueprint $table) {
+        Schema::connection('tenant')->create('rg_recurring_invoice_comments', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
@@ -26,7 +26,7 @@ class CreateRgInvoiceRecurringCommentsTable extends Migration
 
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
-            $table->unsignedBigInteger('invoice_recurring_id');
+            $table->unsignedBigInteger('recurring_invoice_id');
             $table->string('comment', 250);
         });
     }
@@ -38,6 +38,6 @@ class CreateRgInvoiceRecurringCommentsTable extends Migration
      */
     public function down()
     {
-        Schema::connection('tenant')->dropIfExists('rg_invoice_recurring_comments');
+        Schema::connection('tenant')->dropIfExists('rg_recurring_invoice_comments');
     }
 }

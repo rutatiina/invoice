@@ -4,8 +4,8 @@ namespace Rutatiina\Invoice\Traits\Recurring;
 
 use Illuminate\Support\Facades\Validator;
 use Rutatiina\Contact\Models\Contact;
-use Rutatiina\Invoice\Models\InvoiceRecurring;
-use Rutatiina\Invoice\Models\InvoiceRecurringSetting;
+use Rutatiina\Invoice\Models\RecurringInvoice;
+use Rutatiina\Invoice\Models\RecurringInvoiceSetting;
 use Rutatiina\Tax\Models\Tax;
 
 trait Validate
@@ -188,7 +188,7 @@ trait Validate
 
         // << data validation <<------------------------------------------------------------
 
-        $this->settings = InvoiceRecurringSetting::with(['financial_account_to_debit', 'financial_account_to_credit'])->first();
+        $this->settings = RecurringInvoiceSetting::with(['financial_account_to_debit', 'financial_account_to_credit'])->first();
 
         if (!$this->settings->financial_account_to_debit && !$this->settings->financial_account_to_credit)
         {
@@ -247,7 +247,7 @@ trait Validate
 
         //print_r($data); exit;
 
-        $last_txn = InvoiceRecurring::latest()->first();
+        $last_txn = RecurringInvoice::latest()->first();
 
 
         // >> Generate the transaction variables

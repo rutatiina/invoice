@@ -4,9 +4,9 @@ namespace Rutatiina\Invoice\Services;
 
 use Illuminate\Support\Facades\Validator;
 use Rutatiina\Contact\Models\Contact;
-use Rutatiina\Invoice\Models\InvoiceRecurringSetting;
+use Rutatiina\Invoice\Models\RecurringInvoiceSetting;
 
-class InvoiceRecurringValidateService
+class RecurringInvoiceValidateService
 {
     public static $errors = [];
 

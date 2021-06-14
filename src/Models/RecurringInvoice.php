@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use App\Scopes\TenantIdScope;
 
-class InvoiceRecurring extends Model
+class RecurringInvoice extends Model
 {
     use LogsActivity;
 
@@ -18,7 +18,7 @@ class InvoiceRecurring extends Model
 
     protected $connection = 'tenant';
 
-    protected $table = 'rg_invoice_recurrings';
+    protected $table = 'rg_recurring_invoices';
 
     protected $primaryKey = 'id';
 
@@ -126,12 +126,12 @@ class InvoiceRecurring extends Model
 
     public function items()
     {
-        return $this->hasMany('Rutatiina\Invoice\Models\InvoiceRecurringItem', 'invoice_recurring_id')->orderBy('id', 'asc');
+        return $this->hasMany('Rutatiina\Invoice\Models\RecurringInvoiceItem', 'recurring_invoice_id')->orderBy('id', 'asc');
     }
 
     public function comments()
     {
-        return $this->hasMany('Rutatiina\Invoice\Models\InvoiceRecurringComment', 'invoice_recurring_id')->latest();
+        return $this->hasMany('Rutatiina\Invoice\Models\RecurringInvoiceComment', 'recurring_invoice_id')->latest();
     }
 
     public function contact()
@@ -141,7 +141,7 @@ class InvoiceRecurring extends Model
 
     public function item_taxes()
     {
-        return $this->hasMany('Rutatiina\Invoice\Models\InvoiceRecurringItemTax', 'invoice_recurring_id', 'id');
+        return $this->hasMany('Rutatiina\Invoice\Models\RecurringInvoiceItemTax', 'recurring_invoice_id', 'id');
     }
 
     public function getTaxesAttribute()

@@ -4,10 +4,10 @@ namespace Rutatiina\Invoice\Classes\Recurring;
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
-use Rutatiina\Invoice\Models\InvoiceRecurring;
+use Rutatiina\Invoice\Models\RecurringInvoice;
 
-use Rutatiina\Invoice\Models\InvoiceRecurringItem;
-use Rutatiina\Invoice\Models\InvoiceRecurringLedger;
+use Rutatiina\Invoice\Models\RecurringInvoiceItem;
+use Rutatiina\Invoice\Models\RecurringInvoiceLedger;
 use Rutatiina\Invoice\Traits\Recurring\Init as TxnTraitsInit;
 use Rutatiina\Invoice\Traits\Recurring\Inventory as TxnTraitsInventory;
 use Rutatiina\Invoice\Traits\Recurring\InventoryReverse as TxnTraitsInventoryReverse;
@@ -40,7 +40,7 @@ class Update
         $verifyWebData = $this->validate();
         if ($verifyWebData === false) return false;
 
-        $Txn = InvoiceRecurring::with('items', 'ledgers', 'debit_account', 'credit_account')->find($this->txn['id']);
+        $Txn = RecurringInvoice::with('items', 'ledgers', 'debit_account', 'credit_account')->find($this->txn['id']);
 
         if (!$Txn) {
             $this->errors[] = 'Transaction not found';
@@ -70,10 +70,10 @@ class Update
         try {
 
             //Delete the ledger entries
-            InvoiceRecurringLedger::where('invoice_recurring_id', $this->txn['original']['id'])->delete();
+            RecurringInvoiceLedger::where('recurring_invoice_id', $this->txn['original']['id'])->delete();
 
             //Delete the items
-            InvoiceRecurringItem::where('invoice_recurring_id', $this->txn['original']['id'])->delete();
+            RecurringInvoiceItem::where('recurring_invoice_id', $this->txn['original']['id'])->delete();
 
             // >> reverse all the inventory and balance effects
             //inventory checks and inventory balance update if needed
@@ -119,7 +119,7 @@ class Update
             $Txn->save();
 
             foreach($this->txn['items'] as &$item) {
-                $item['invoice_recurring_id'] = $txnId;
+                $item['recurring_invoice_id'] = $txnId;
             }
 
             unset($item);
@@ -154,7 +154,7 @@ class Update
 
                     //now --Create items to be posted under the parent txn
                     //the bellow code has to be at end of loop so that the correct $txnInReference is got
-                    $value['invoice_recurring_id']    = $value['type_id']; //Set the txn id of the Parent transaction
+                    $value['recurring_invoice_id']    = $value['type_id']; //Set the txn id of the Parent transaction
                     $value['type_id']   = $txnId; //Set the Txn id of the transaction being created
                     $this->txn['items'][]     = $value;
 
@@ -164,15 +164,15 @@ class Update
             //print_r($this->txn['items']); exit;
 
             foreach($this->txn['ledgers'] as &$ledger) {
-                $ledger['invoice_recurring_id'] = $txnId;
+                $ledger['recurring_invoice_id'] = $txnId;
             }
             unset($ledger);
 
             //Save the items >> $this->txn['items']
-            InvoiceRecurringItem::insert($this->txn['items']);
+            RecurringInvoiceItem::insert($this->txn['items']);
 
             //Save the ledgers >> $this->txn['ledgers']; and update the balances
-            InvoiceRecurringLedger::insert($this->txn['ledgers']);
+            RecurringInvoiceLedger::insert($this->txn['ledgers']);
 
             $this->approve();
 

@@ -2,7 +2,7 @@
 
 namespace Rutatiina\Invoice\Classes\Recurring;
 
-use Rutatiina\Invoice\Models\InvoiceRecurring;
+use Rutatiina\Invoice\Models\RecurringInvoice;
 use Rutatiina\Invoice\Traits\Recurring\Init as TxnTraitsInit;
 
 class Read
@@ -14,7 +14,7 @@ class Read
 
     public function run($id)
     {
-        $Txn = InvoiceRecurring::find($id);
+        $Txn = RecurringInvoice::find($id);
 
         if ($Txn) {
             //txn has been found so continue normally

@@ -22,13 +22,13 @@ Route::group(['middleware' => ['web', 'auth', 'tenant', 'service.accounting']], 
     Route::prefix('recurring-invoices')->group(function () {
 
         //Route::get('summary', 'Rutatiina\Invoice\Http\Controllers\RecurringController@summary');
-        Route::post('export-to-excel', 'Rutatiina\Invoice\Http\Controllers\InvoiceRecurringController@exportToExcel');
-        Route::post('{id}/approve', 'Rutatiina\Invoice\Http\Controllers\InvoiceRecurringController@approve');
-        Route::get('{id}/copy', 'Rutatiina\Invoice\Http\Controllers\InvoiceRecurringController@copy');
+        Route::post('export-to-excel', 'Rutatiina\Invoice\Http\Controllers\RecurringInvoiceController@exportToExcel');
+        Route::post('{id}/approve', 'Rutatiina\Invoice\Http\Controllers\RecurringInvoiceController@approve');
+        Route::get('{id}/copy', 'Rutatiina\Invoice\Http\Controllers\RecurringInvoiceController@copy');
 
     });
 
-    Route::resource('recurring-invoices/settings', 'Rutatiina\Invoice\Http\Controllers\InvoiceRecurringSettingController');
-    Route::resource('recurring-invoices', 'Rutatiina\Invoice\Http\Controllers\InvoiceRecurringController');
+    Route::resource('recurring-invoices/settings', 'Rutatiina\Invoice\Http\Controllers\RecurringInvoiceSettingController');
+    Route::resource('recurring-invoices', 'Rutatiina\Invoice\Http\Controllers\RecurringInvoiceController');
 
 });

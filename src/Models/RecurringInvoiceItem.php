@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use App\Scopes\TenantIdScope;
 
-class InvoiceRecurringItemTax extends Model
+class RecurringInvoiceItem extends Model
 {
     use LogsActivity;
 
@@ -18,7 +18,7 @@ class InvoiceRecurringItemTax extends Model
 
     protected $connection = 'tenant';
 
-    protected $table = 'rg_invoice_recurring_item_taxes';
+    protected $table = 'rg_recurring_invoice_items';
 
     protected $primaryKey = 'id';
 
@@ -46,19 +46,14 @@ class InvoiceRecurringItemTax extends Model
         }
     }
 
-    public function tax()
+    public function recurring_invoice()
     {
-        return $this->hasOne('Rutatiina\Tax\Models\Tax', 'code', 'tax_code');
+        return $this->belongsTo('Rutatiina\Invoice\Models\RecurringInvoice', 'recurring_invoice_id');
     }
 
-    public function invoice_recurring()
+    public function taxes()
     {
-        return $this->belongsTo('Rutatiina\InvoiceRecurring\Models\InvoiceRecurring', 'invoice_recurring_id', 'id');
-    }
-
-    public function invoice_recurring_item()
-    {
-        return $this->belongsTo('Rutatiina\InvoiceRecurring\Models\InvoiceRecurringItem', 'invoice_recurring_item_id', 'id');
+        return $this->hasMany('Rutatiina\Invoice\Models\RecurringInvoiceItemTax', 'recurring_invoice_item_id', 'id');
     }
 
 }

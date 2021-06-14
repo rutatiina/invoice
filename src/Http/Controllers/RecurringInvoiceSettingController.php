@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request as FacadesRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Rutatiina\Invoice\Models\InvoiceRecurringSetting;
+use Rutatiina\Invoice\Models\RecurringInvoiceSetting;
 use Rutatiina\FinancialAccounting\Traits\FinancialAccountingTrait;
 use Rutatiina\Item\Traits\ItemsVueSearchSelect;
 use Yajra\DataTables\Facades\DataTables;
 use Rutatiina\FinancialAccounting\Models\Account;
 
-class InvoiceRecurringSettingController extends Controller
+class RecurringInvoiceSettingController extends Controller
 {
     use FinancialAccountingTrait;
     use ItemsVueSearchSelect;
@@ -37,7 +37,7 @@ class InvoiceRecurringSettingController extends Controller
 
         return [
             'financial_accounts' => Account::all(),
-            'settings' => InvoiceRecurringSetting::first()
+            'settings' => RecurringInvoiceSetting::first()
         ];
     }
 
@@ -65,7 +65,7 @@ class InvoiceRecurringSettingController extends Controller
         }
 
         //save data posted
-        $settings = InvoiceRecurringSetting::first();
+        $settings = RecurringInvoiceSetting::first();
         $settings->document_name = $request->document_name;
         $settings->number_prefix = $request->number_prefix;
         $settings->number_postfix = $request->number_postfix;

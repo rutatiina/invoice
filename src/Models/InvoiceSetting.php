@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use App\Scopes\TenantIdScope;
 
-class Setting extends Model
+class InvoiceSetting extends Model
 {
     use LogsActivity;
 

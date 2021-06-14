@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use App\Scopes\TenantIdScope;
 
-class InvoiceRecurringSetting extends Model
+class RecurringInvoiceSetting extends Model
 {
     use LogsActivity;
 
@@ -18,7 +18,7 @@ class InvoiceRecurringSetting extends Model
 
     protected $connection = 'tenant';
 
-    protected $table = 'rg_invoice_recurring_settings';
+    protected $table = 'rg_recurring_invoice_settings';
 
     protected $primaryKey = 'id';
 

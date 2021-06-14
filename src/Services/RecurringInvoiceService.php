@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Rutatiina\Invoice\Models\InvoiceRecurring;
+use Rutatiina\Invoice\Models\RecurringInvoice;
 use Rutatiina\Tax\Models\Tax;
 
-class InvoiceRecurringService
+class RecurringInvoiceService
 {
     public static $errors = [];
 
@@ -22,7 +22,7 @@ class InvoiceRecurringService
     {
         $taxes = Tax::all()->keyBy('code');
 
-        $txn = InvoiceRecurring::findOrFail($id);
+        $txn = RecurringInvoice::findOrFail($id);
         $txn->load('contact', 'items.taxes');
         $txn->setAppends(['taxes', 'date_range', 'is_recurring']);
 
@@ -68,11 +68,11 @@ class InvoiceRecurringService
 
     public static function store($requestInstance)
     {
-        $data = InvoiceRecurringValidateService::run($requestInstance);
+        $data = RecurringInvoiceValidateService::run($requestInstance);
         //print_r($data); exit;
         if ($data === false)
         {
-            self::$errors = InvoiceRecurringValidateService::$errors;
+            self::$errors = RecurringInvoiceValidateService::$errors;
             return false;
         }
 
@@ -81,7 +81,7 @@ class InvoiceRecurringService
 
         try
         {
-            $Txn = new InvoiceRecurring;
+            $Txn = new RecurringInvoice;
             $Txn->tenant_id = $data['tenant_id'];
             $Txn->created_by = Auth::id();
             $Txn->profile_name = $data['profile_name'];
@@ -113,7 +113,7 @@ class InvoiceRecurringService
             //print_r($data['items']); exit;
 
             //Save the items >> $data['items']
-            InvoiceRecurringItemService::store($data);
+            RecurringInvoiceItemService::store($data);
 
             DB::connection('tenant')->commit();
 
@@ -148,11 +148,11 @@ class InvoiceRecurringService
 
     public static function update($requestInstance)
     {
-        $data = InvoiceRecurringValidateService::run($requestInstance);
+        $data = RecurringInvoiceValidateService::run($requestInstance);
         //print_r($data); exit;
         if ($data === false)
         {
-            self::$errors = InvoiceRecurringValidateService::$errors;
+            self::$errors = RecurringInvoiceValidateService::$errors;
             return false;
         }
 
@@ -161,7 +161,7 @@ class InvoiceRecurringService
 
         try
         {
-            $Txn = InvoiceRecurring::with('items', 'ledgers')->findOrFail($data['id']);
+            $Txn = RecurringInvoice::with('items', 'ledgers')->findOrFail($data['id']);
 
             if ($Txn->status == 'approved')
             {
@@ -205,7 +205,7 @@ class InvoiceRecurringService
             //print_r($data['items']); exit;
 
             //Save the items >> $data['items']
-            InvoiceRecurringItemService::store($data);
+            RecurringInvoiceItemService::store($data);
 
             DB::connection('tenant')->commit();
 
@@ -244,7 +244,7 @@ class InvoiceRecurringService
 
         try
         {
-            $Txn = InvoiceRecurring::findOrFail($id);
+            $Txn = RecurringInvoice::findOrFail($id);
 
             if ($Txn->status == 'approved')
             {
@@ -292,7 +292,7 @@ class InvoiceRecurringService
     {
         $taxes = Tax::all()->keyBy('code');
 
-        $txn = InvoiceRecurring::findOrFail($id);
+        $txn = RecurringInvoice::findOrFail($id);
         $txn->load('contact', 'items.taxes');
         $txn->setAppends(['taxes', 'date_range', 'is_recurring']);
 
@@ -337,7 +337,7 @@ class InvoiceRecurringService
 
     public static function approve($id)
     {
-        $Txn = InvoiceRecurring::with(['ledgers'])->findOrFail($id);
+        $Txn = RecurringInvoice::with(['ledgers'])->findOrFail($id);
 
         if (strtolower($Txn->status) != 'draft')
         {

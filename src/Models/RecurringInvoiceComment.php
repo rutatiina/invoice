@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
 use App\Scopes\TenantIdScope;
 
-class InvoiceRecurringLedger extends Model
+class RecurringInvoiceComment extends Model
 {
     use LogsActivity;
 
-    protected static $logName = 'TxnLedger';
+    protected static $logName = 'TxnComment';
     protected static $logFillable = true;
     protected static $logAttributes = ['*'];
     protected static $logAttributesToIgnore = ['updated_at'];
@@ -18,11 +18,9 @@ class InvoiceRecurringLedger extends Model
 
     protected $connection = 'tenant';
 
-    protected $table = 'rg_invoice_recurring_ledgers';
+    protected $table = 'rg_recurring_invoice_comments';
 
     protected $primaryKey = 'id';
-
-    protected $guarded = ['id'];
 
     /**
      * The "booting" method of the model.
@@ -34,11 +32,6 @@ class InvoiceRecurringLedger extends Model
         parent::boot();
 
         static::addGlobalScope(new TenantIdScope);
-    }
-
-    public function recurring_invoice()
-    {
-        return $this->belongsTo('Rutatiina\Invoice\Models\InvoiceRecurring', 'invoice_recurring_id');
     }
 
 }

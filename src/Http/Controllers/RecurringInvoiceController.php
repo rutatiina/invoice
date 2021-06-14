@@ -2,15 +2,15 @@
 
 namespace Rutatiina\Invoice\Http\Controllers;
 
-use Rutatiina\Invoice\Services\InvoiceRecurringService;
+use Rutatiina\Invoice\Services\RecurringInvoiceService;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Request as FacadesRequest;
-use Rutatiina\Invoice\Models\InvoiceRecurring;
+use Rutatiina\Invoice\Models\RecurringInvoice;
 
-class InvoiceRecurringController extends Controller
+class RecurringInvoiceController extends Controller
 {
     public function __construct()
     {
@@ -28,8 +28,7 @@ class InvoiceRecurringController extends Controller
             return view('l-limitless-bs4.layout_2-ltr-default.appVue');
         }
 
-        $query = InvoiceRecurring::query();
-        $query->with('properties');
+        $query = RecurringInvoice::query();
 
         if ($request->contact)
         {
@@ -57,7 +56,7 @@ class InvoiceRecurringController extends Controller
 
         $tenant = Auth::user()->tenant;
 
-        $txnAttributes = (new InvoiceRecurring)->rgGetAttributes();
+        $txnAttributes = (new RecurringInvoice)->rgGetAttributes();
 
         $txnAttributes['status'] = 'approved';
         $txnAttributes['contact_id'] = '';
@@ -120,13 +119,13 @@ class InvoiceRecurringController extends Controller
     {
         //return $request;
 
-        $storeService = InvoiceRecurringService::store($request);
+        $storeService = RecurringInvoiceService::store($request);
 
         if ($storeService == false)
         {
             return [
                 'status' => false,
-                'messages' => InvoiceRecurringService::$errors
+                'messages' => RecurringInvoiceService::$errors
             ];
         }
 
@@ -147,8 +146,8 @@ class InvoiceRecurringController extends Controller
             return view('l-limitless-bs4.layout_2-ltr-default.appVue');
         }
 
-        $txn = InvoiceRecurring::findOrFail($id);
-        $txn->load('contact', 'properties', 'items.taxes');
+        $txn = RecurringInvoice::findOrFail($id);
+        $txn->load('contact', 'items.taxes');
         $txn->setAppends([
             'taxes',
             'number_string',
@@ -166,7 +165,7 @@ class InvoiceRecurringController extends Controller
             return view('l-limitless-bs4.layout_2-ltr-default.appVue');
         }
 
-        $txnAttributes = InvoiceRecurringService::edit($id);
+        $txnAttributes = RecurringInvoiceService::edit($id);
 
         return [
             'pageTitle' => 'Edit Recurring Invoice', #required
@@ -180,13 +179,13 @@ class InvoiceRecurringController extends Controller
     {
         //print_r($request->all()); exit;
 
-        $updateService = InvoiceRecurringService::update($request);
+        $updateService = RecurringInvoiceService::update($request);
 
         if ($updateService == false)
         {
             return [
                 'status' => false,
-                'messages' => InvoiceRecurringService::$errors
+                'messages' => RecurringInvoiceService::$errors
             ];
         }
 
@@ -200,7 +199,7 @@ class InvoiceRecurringController extends Controller
 
     public function destroy($id)
     {
-        $destroy = InvoiceRecurringService::destroy($id);
+        $destroy = RecurringInvoiceService::destroy($id);
 
         if ($destroy)
         {
@@ -213,7 +212,7 @@ class InvoiceRecurringController extends Controller
         {
             return [
                 'status' => false,
-                'messages' => InvoiceRecurringService::$errors
+                'messages' => RecurringInvoiceService::$errors
             ];
         }
     }
@@ -222,13 +221,13 @@ class InvoiceRecurringController extends Controller
 
     public function approve($id)
     {
-        $approve = InvoiceRecurringService::approve($id);
+        $approve = RecurringInvoiceService::approve($id);
 
         if ($approve == false)
         {
             return [
                 'status' => false,
-                'messages' => InvoiceRecurringService::$errors
+                'messages' => RecurringInvoiceService::$errors
             ];
         }
 
@@ -247,7 +246,7 @@ class InvoiceRecurringController extends Controller
             return view('l-limitless-bs4.layout_2-ltr-default.appVue');
         }
 
-        $txnAttributes = InvoiceRecurringService::copy($id);
+        $txnAttributes = RecurringInvoiceService::copy($id);
 
         return [
             'pageTitle' => 'Copy Invoices', #required

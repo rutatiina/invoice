@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRgInvoiceRecurringPropertiesTable extends Migration
+class CreateRgRecurringInvoiceItemTaxesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateRgInvoiceRecurringPropertiesTable extends Migration
      */
     public function up()
     {
-        Schema::connection('tenant')->create('rg_invoice_recurring_properties', function (Blueprint $table) {
+        Schema::connection('tenant')->create('rg_recurring_invoice_item_taxes', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
 
@@ -26,17 +26,12 @@ class CreateRgInvoiceRecurringPropertiesTable extends Migration
 
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
-            $table->unsignedBigInteger('invoice_recurring_id');
-            $table->string('status', 20); //active | paused | de-active
-            $table->string('frequency', 50);
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->string('day_of_month', 10);
-            $table->string('month', 10);
-            $table->string('day_of_week', 10);
-
-            $table->dateTime('last_run')->comment('date time of last run');
-            $table->dateTime('next_run')->comment('date time of next run');
+            $table->unsignedBigInteger('recurring_invoice_id');
+            $table->unsignedBigInteger('recurring_invoice_item_id');
+            $table->char('tax_code', 50);
+            $table->unsignedDecimal('amount', 20,5);
+            $table->unsignedDecimal('inclusive', 20,5);
+            $table->unsignedDecimal('exclusive', 20,5);
 
         });
     }
@@ -48,6 +43,6 @@ class CreateRgInvoiceRecurringPropertiesTable extends Migration
      */
     public function down()
     {
-        Schema::connection('tenant')->dropIfExists('rg_invoice_recurring_properties');
+        Schema::connection('tenant')->dropIfExists('rg_recurring_invoice_item_taxes');
     }
 }

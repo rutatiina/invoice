@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Rutatiina\Invoice\Models\Invoice;
 use Rutatiina\FinancialAccounting\Services\AccountBalanceUpdateService;
 use Rutatiina\FinancialAccounting\Services\ContactBalanceUpdateService;
-use Rutatiina\Invoice\Models\Setting;
+use Rutatiina\Invoice\Models\InvoiceSetting;
 use Rutatiina\Tax\Models\Tax;
 
 class InvoiceService
@@ -24,7 +24,7 @@ class InvoiceService
     public static function nextNumber()
     {
         $count = Invoice::count();
-        $settings = Setting::first();
+        $settings = InvoiceSetting::first();
 
         return $settings->number_prefix . (str_pad(($count + 1), $settings->minimum_number_length, "0", STR_PAD_LEFT)) . $settings->number_postfix;
     }

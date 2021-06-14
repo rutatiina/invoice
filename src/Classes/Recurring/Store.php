@@ -4,10 +4,10 @@ namespace Rutatiina\Invoice\Classes\Recurring;
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
-use Rutatiina\Invoice\Models\InvoiceRecurring;
-use Rutatiina\Invoice\Models\InvoiceRecurringItem;
-use Rutatiina\Invoice\Models\InvoiceRecurringItemTax;
-use Rutatiina\Invoice\Models\InvoiceRecurringProperty;
+use Rutatiina\Invoice\Models\RecurringInvoice;
+use Rutatiina\Invoice\Models\RecurringInvoiceItem;
+use Rutatiina\Invoice\Models\RecurringInvoiceItemTax;
+use Rutatiina\Invoice\Models\RecurringInvoiceProperty;
 use Rutatiina\Invoice\Traits\Recurring\Init as TxnTraitsInit;
 use Rutatiina\Invoice\Traits\Recurring\TxnItemsContactsIdsLedgers as TxnTraitsTxnItemsContactsIdsLedgers;
 use Rutatiina\Invoice\Traits\Recurring\TxnItemsJournalLedgers as TxnTraitsTxnItemsJournalLedgers;
@@ -56,7 +56,7 @@ class Store
         try {
 
             //print_r($this->txn); exit;
-            $Txn = new InvoiceRecurring;
+            $Txn = new RecurringInvoice;
             $Txn->tenant_id = $this->txn['tenant_id'];
             $Txn->document_name = $this->txn['document_name'];
             $Txn->number_prefix = $this->txn['number_prefix'];
@@ -92,20 +92,20 @@ class Store
 
             foreach($this->txn['items'] as &$item)
             {
-                $item['invoice_recurring_id'] = $this->txn['id'];
+                $item['recurring_invoice_id'] = $this->txn['id'];
 
                 $itemTaxes = (is_array($item['taxes'])) ? $item['taxes'] : [] ;
                 unset($item['taxes']);
 
-                $itemModel = InvoiceRecurringItem::create($item);
+                $itemModel = RecurringInvoiceItem::create($item);
 
                 foreach ($itemTaxes as $tax)
                 {
                     //save the taxes attached to the item
-                    $itemTax = new InvoiceRecurringItemTax;
+                    $itemTax = new RecurringInvoiceItemTax;
                     $itemTax->tenant_id = $item['tenant_id'];
-                    $itemTax->invoice_recurring_id = $item['invoice_recurring_id'];
-                    $itemTax->invoice_recurring_item_id = $itemModel->id;
+                    $itemTax->recurring_invoice_id = $item['recurring_invoice_id'];
+                    $itemTax->recurring_invoice_item_id = $itemModel->id;
                     $itemTax->tax_code = $tax['code'];
                     $itemTax->amount = $tax['total'];
                     $itemTax->inclusive = $tax['inclusive'];
@@ -123,9 +123,9 @@ class Store
             //NOTE >> no need to update ledgers since this is not an accounting entry
 
 
-            $TxnRecurring = new InvoiceRecurringProperty;
+            $TxnRecurring = new RecurringInvoiceProperty;
             $TxnRecurring->tenant_id = $this->txn['tenant_id'];
-            $TxnRecurring->invoice_recurring_id = $this->txn['id'];
+            $TxnRecurring->recurring_invoice_id = $this->txn['id'];
             $TxnRecurring->status = $this->txn['recurring']['status'];
             $TxnRecurring->frequency = $this->txn['recurring']['frequency'];
             //$TxnRecurring->measurement = $this->txn['recurring']['frequency']; //of no use
