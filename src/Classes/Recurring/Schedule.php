@@ -29,7 +29,7 @@ class Schedule
 
         //get the last invoice number
         $txn = Invoice::orderBy('id', 'desc')->first();
-        //$settings = Setting::first();
+        //$settings = InvoiceSetting::first();
         //$number = $settings->number_prefix.(str_pad((optional($txn)->number+1), $settings->minimum_number_length, "0", STR_PAD_LEFT)).$settings->number_postfix;
 
         $TxnCopy = new RecurringInvoiceCopy();

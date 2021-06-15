@@ -5,7 +5,7 @@ namespace Rutatiina\Invoice\Traits;
 use Illuminate\Support\Facades\Validator;
 use Rutatiina\Contact\Models\Contact;
 use Rutatiina\Invoice\Models\Invoice;
-use Rutatiina\Invoice\Models\Setting;
+use Rutatiina\Invoice\Models\InvoiceSetting;
 use Rutatiina\FinancialAccounting\Models\Account;
 use Rutatiina\Tax\Models\Tax;
 
@@ -171,7 +171,7 @@ trait Validate
 
         // << data validation <<------------------------------------------------------------
 
-        $this->settings = Setting::with(['financial_account_to_debit', 'financial_account_to_credit'])
+        $this->settings = InvoiceSetting::with(['financial_account_to_debit', 'financial_account_to_credit'])
             //->where('tenant_id', $data['tenant_id']) //this has to be added for the case of sheduled entried with tenantId set via scope
             ->first();
 
