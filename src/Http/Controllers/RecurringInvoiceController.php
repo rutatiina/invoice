@@ -34,8 +34,7 @@ class RecurringInvoiceController extends Controller
         {
             $query->where(function ($q) use ($request)
             {
-                $q->where('debit_contact_id', $request->contact);
-                $q->orWhere('credit_contact_id', $request->contact);
+                $q->where('contact_id', $request->contact);
             });
         }
 
@@ -100,19 +99,12 @@ class RecurringInvoiceController extends Controller
             ]
         ];
 
-        unset($txnAttributes['txn_entree_id']); //!important
-        unset($txnAttributes['txn_type_id']); //!important
-        unset($txnAttributes['debit_contact_id']); //!important
-        unset($txnAttributes['credit_contact_id']); //!important
-
-        $data = [
+        return [
             'pageTitle' => 'Create Recurring Invoice', #required
             'pageAction' => 'Create', #required
             'txnUrlStore' => '/recurring-invoices', #required
             'txnAttributes' => $txnAttributes, #required
         ];
-
-        return $data;
     }
 
     public function store(Request $request)

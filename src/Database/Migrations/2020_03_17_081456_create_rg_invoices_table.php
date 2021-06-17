@@ -35,8 +35,7 @@ class CreateRgInvoicesTable extends Migration
             $table->time('time');
             $table->unsignedBigInteger('debit_financial_account_code')->nullable();
             //$table->unsignedBigInteger('credit_financial_account_code')->nullable();
-            $table->unsignedBigInteger('debit_contact_id');
-            $table->unsignedBigInteger('credit_contact_id');
+            $table->unsignedBigInteger('contact_id');
             $table->string('contact_name', 50);
             $table->string('contact_address', 50);
             $table->string('reference', 100)->nullable();

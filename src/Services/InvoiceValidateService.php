@@ -81,8 +81,7 @@ class InvoiceValidateService
         $data['number_postfix'] = $settings->number_postfix;
         $data['date'] = $requestInstance->input('date');
         $data['debit_financial_account_code'] = $settings->financial_account_to_debit->code;
-        $data['debit_contact_id'] = $requestInstance->contact_id;
-        $data['credit_contact_id'] = $requestInstance->contact_id;
+        $data['contact_id'] = $requestInstance->contact_id;
         $data['contact_name'] = $contact->name;
         $data['contact_address'] = trim($contact->shipping_address_street1 . ' ' . $contact->shipping_address_street2);
         $data['reference'] = $requestInstance->input('reference', null);
@@ -149,7 +148,7 @@ class InvoiceValidateService
             $data['ledgers'][$financialAccountToCredit]['financial_account_code'] = $financialAccountToCredit;
             $data['ledgers'][$financialAccountToCredit]['effect'] = 'credit';
             $data['ledgers'][$financialAccountToCredit]['total'] = @$data['ledgers'][$financialAccountToCredit]['total'] + $taxableAmount;
-            $data['ledgers'][$financialAccountToCredit]['contact_id'] = $data['debit_contact_id'];
+            $data['ledgers'][$financialAccountToCredit]['contact_id'] = $data['contact_id'];
         }
 
         $data['taxable_amount'] = $taxableAmount;
@@ -161,7 +160,7 @@ class InvoiceValidateService
             'financial_account_code' => $settings->financial_account_to_debit->code,
             'effect' => 'debit',
             'total' => $data['total'],
-            'contact_id' => $data['debit_contact_id']
+            'contact_id' => $data['contact_id']
         ];
 
         //print_r($data['ledgers']); exit;

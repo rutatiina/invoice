@@ -42,8 +42,7 @@ class InvoiceController extends Controller
         {
             $query->where(function ($q) use ($request)
             {
-                $q->where('debit_contact_id', $request->contact);
-                $q->orWhere('credit_contact_id', $request->contact);
+                $q->where('contact_id', $request->contact);
             });
         }
 
@@ -100,9 +99,6 @@ class InvoiceController extends Controller
                 'expiry' => ''
             ]
         ];
-
-        unset($txnAttributes['debit_contact_id']); //!important
-        unset($txnAttributes['credit_contact_id']); //!important
 
         return [
             'pageTitle' => 'Create Invoice', #required
