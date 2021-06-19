@@ -3,7 +3,7 @@
 namespace Rutatiina\Invoice\Traits\Recurring;
 
 use Rutatiina\FinancialAccounting\Traits\Schedule as FinancialAccountingScheduleTrait;
-use Rutatiina\Invoice\Models\RecurringInvoiceProperty;
+use Rutatiina\Invoice\Models\RecurringInvoice;
 
 trait Schedule
 {
@@ -26,7 +26,7 @@ trait Schedule
 
         //the script to process recurring requests
 
-        $tasks = RecurringInvoiceProperty::withoutGlobalScopes()
+        $tasks = RecurringInvoice::withoutGlobalScopes()
             ->where('status', 'active')
             ->get();
 

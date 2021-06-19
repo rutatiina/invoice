@@ -161,7 +161,7 @@ class RecurringInvoiceService
 
         try
         {
-            $Txn = RecurringInvoice::with('items', 'ledgers')->findOrFail($data['id']);
+            $Txn = RecurringInvoice::with('items')->findOrFail($data['id']);
 
             if ($Txn->status == 'approved')
             {
@@ -337,15 +337,13 @@ class RecurringInvoiceService
 
     public static function approve($id)
     {
-        $Txn = RecurringInvoice::with(['ledgers'])->findOrFail($id);
+        $Txn = RecurringInvoice::findOrFail($id);
 
         if (strtolower($Txn->status) != 'draft')
         {
             self::$errors[] = $Txn->status . ' transaction cannot be approved';
             return false;
         }
-
-        $data = $Txn->toArray();
 
         //start database transaction
         DB::connection('tenant')->beginTransaction();
