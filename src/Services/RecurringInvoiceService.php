@@ -163,9 +163,9 @@ class RecurringInvoiceService
         {
             $Txn = RecurringInvoice::with('items')->findOrFail($data['id']);
 
-            if ($Txn->status == 'approved')
+            if ($Txn->status == 'active')
             {
-                self::$errors[] = 'Approved Transaction cannot be not be edited';
+                self::$errors[] = 'Active transaction cannot be not be edited';
                 return false;
             }
 
@@ -246,9 +246,9 @@ class RecurringInvoiceService
         {
             $Txn = RecurringInvoice::findOrFail($id);
 
-            if ($Txn->status == 'approved')
+            if ($Txn->status == 'active')
             {
-                self::$errors[] = 'Approved Transaction cannot be not be deleted';
+                self::$errors[] = 'Active Transaction cannot be not be deleted';
                 return false;
             }
 
@@ -335,13 +335,13 @@ class RecurringInvoiceService
         return $attributes;
     }
 
-    public static function approve($id)
+    public static function activate($id)
     {
         $Txn = RecurringInvoice::findOrFail($id);
 
         if (strtolower($Txn->status) != 'draft')
         {
-            self::$errors[] = $Txn->status . ' transaction cannot be approved';
+            self::$errors[] = $Txn->status . ' transaction cannot be activated';
             return false;
         }
 
@@ -351,7 +351,7 @@ class RecurringInvoiceService
         try
         {
             //update the status of the txn
-            $Txn->status = 'approved';
+            $Txn->status = 'active';
             $Txn->save();
 
             DB::connection('tenant')->commit();

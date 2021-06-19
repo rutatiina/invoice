@@ -57,7 +57,7 @@ class RecurringInvoiceController extends Controller
 
         $txnAttributes = (new RecurringInvoice)->rgGetAttributes();
 
-        $txnAttributes['status'] = 'approved';
+        $txnAttributes['status'] = 'active';
         $txnAttributes['contact_id'] = '';
         $txnAttributes['contact'] = json_decode('{"currencies":[]}'); #required
         $txnAttributes['date'] = date('Y-m-d');
@@ -211,9 +211,9 @@ class RecurringInvoiceController extends Controller
 
     #-----------------------------------------------------------------------------------
 
-    public function approve($id)
+    public function activate($id)
     {
-        $approve = RecurringInvoiceService::approve($id);
+        $approve = RecurringInvoiceService::activate($id);
 
         if ($approve == false)
         {
@@ -225,7 +225,7 @@ class RecurringInvoiceController extends Controller
 
         return [
             'status' => true,
-            'messages' => ['Recurring Invoice Approved'],
+            'messages' => ['Recurring invoice activated'],
         ];
 
     }

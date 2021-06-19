@@ -23,7 +23,7 @@ Route::group(['middleware' => ['web', 'auth', 'tenant', 'service.accounting']], 
 
         //Route::get('summary', 'Rutatiina\Invoice\Http\Controllers\RecurringController@summary');
         Route::post('export-to-excel', 'Rutatiina\Invoice\Http\Controllers\RecurringInvoiceController@exportToExcel');
-        Route::post('{id}/approve', 'Rutatiina\Invoice\Http\Controllers\RecurringInvoiceController@approve');
+        Route::post('{id}/activate', 'Rutatiina\Invoice\Http\Controllers\RecurringInvoiceController@activate');
         Route::get('{id}/copy', 'Rutatiina\Invoice\Http\Controllers\RecurringInvoiceController@copy');
 
     });
