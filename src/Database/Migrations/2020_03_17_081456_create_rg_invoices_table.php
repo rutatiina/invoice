@@ -27,7 +27,6 @@ class CreateRgInvoicesTable extends Migration
             //>> table columns
             $table->unsignedBigInteger('project_id')->nullable();
             $table->unsignedBigInteger('parent_id');
-            $table->string('external_key', 100);
             $table->unsignedBigInteger('app_id');
             $table->string('document_name', 50)->default('Invoice');
             $table->string('number', 250);
@@ -50,7 +49,6 @@ class CreateRgInvoicesTable extends Migration
             $table->unsignedBigInteger('branch_id')->nullable();
             $table->unsignedBigInteger('store_id')->nullable();
             $table->date('due_date')->nullable();
-            $table->date('expiry_date')->nullable();
             $table->string('status', 20)->nullable();
             $table->unsignedTinyInteger('sent')->nullable();
             $table->unsignedBigInteger('salesperson_id')->nullable();
