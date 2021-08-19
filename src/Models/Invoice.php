@@ -195,9 +195,9 @@ class Invoice extends Model
         {
             if (isset($grouped[$item_tax->tax_code]))
             {
-                $grouped['amount'] += $item_tax['amount'];
-                $grouped['inclusive'] += $item_tax['inclusive'];
-                $grouped['exclusive'] += $item_tax['exclusive'];
+                $grouped[$item_tax->tax_code]['amount'] += $item_tax['amount'];
+                $grouped[$item_tax->tax_code]['inclusive'] += $item_tax['inclusive'];
+                $grouped[$item_tax->tax_code]['exclusive'] += $item_tax['exclusive'];
             }
             else
             {
