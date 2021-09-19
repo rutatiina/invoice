@@ -4,7 +4,7 @@ namespace Rutatiina\Invoice\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
-use App\Scopes\TenantIdScope;
+use Rutatiina\Tenant\Scopes\TenantIdScope;
 
 class InvoiceItemTax extends Model
 {
