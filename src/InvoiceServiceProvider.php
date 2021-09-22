@@ -2,10 +2,14 @@
 
 namespace Rutatiina\Invoice;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
+use Rutatiina\Invoice\Traits\Recurring\Schedule as RecurringInvoiceScheduleTrait;
 
 class InvoiceServiceProvider extends ServiceProvider
 {
+    use RecurringInvoiceScheduleTrait;
+
     /**
      * Bootstrap services.
      *
@@ -34,6 +38,11 @@ class InvoiceServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__.'/resources/views', 'invoice');
         $this->loadMigrationsFrom(__DIR__.'/Database/Migrations');
+
+        //register the scheduled tasks
+        $this->app->booted(function () {
+            $this->recurringInvoiceSchedule(app(Schedule::class));
+        });
     }
 
     /**

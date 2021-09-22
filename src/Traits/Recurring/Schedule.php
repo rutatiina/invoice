@@ -8,6 +8,7 @@ use Rutatiina\Invoice\Models\RecurringInvoice;
 trait Schedule
 {
     use FinancialAccountingScheduleTrait;
+
     /**
      * Execute the console command.
      *

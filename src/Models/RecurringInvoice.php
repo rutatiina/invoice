@@ -124,6 +124,11 @@ class RecurringInvoice extends Model
         return [$this->start_date, $this->end_date];
     }
 
+    public function tenant()
+    {
+        return $this->belongsTo('Rutatiina\Tenant\Models\Tenant', 'tenant_id');
+    }
+
     public function items()
     {
         return $this->hasMany('Rutatiina\Invoice\Models\RecurringInvoiceItem', 'recurring_invoice_id')->orderBy('id', 'asc');
