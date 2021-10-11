@@ -2,6 +2,7 @@
 
 namespace Rutatiina\Invoice\Traits\Recurring;
 
+use Illuminate\Support\Facades\Schema;
 use Rutatiina\FinancialAccounting\Traits\Schedule as FinancialAccountingScheduleTrait;
 use Rutatiina\Invoice\Models\RecurringInvoice;
 
@@ -26,6 +27,8 @@ trait Schedule
         //})->everyMinute()->runInBackground();
 
         //the script to process recurring requests
+
+        if (!Schema::hasTable((new RecurringInvoice)->getTable())) return false;
 
         $tasks = RecurringInvoice::withoutGlobalScopes()
             ->where('status', 'active')
