@@ -29,8 +29,15 @@ trait Schedule
 
         //the script to process recurring requests
 
-        if (!DB::connection('tenant')->getDatabaseName()) return false;
-        if (!Schema::hasTable((new RecurringInvoice)->getTable())) return false;
+        try
+        {
+            DB::connection('tenant')->getDatabaseName();
+            Schema::hasTable((new RecurringInvoice)->getTable());
+        }
+        catch (\Throwable $e)
+        {
+            return false;
+        }
 
         $tasks = RecurringInvoice::withoutGlobalScopes()
             ->where('status', 'active')
