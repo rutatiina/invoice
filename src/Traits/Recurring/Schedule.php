@@ -3,6 +3,7 @@
 namespace Rutatiina\Invoice\Traits\Recurring;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Rutatiina\FinancialAccounting\Traits\Schedule as FinancialAccountingScheduleTrait;
 use Rutatiina\Invoice\Models\RecurringInvoice;
@@ -38,6 +39,8 @@ trait Schedule
         {
             return false;
         }
+
+        if (!Schema::hasTable((new RecurringInvoice)->getTable())) return false;
 
         $tasks = RecurringInvoice::withoutGlobalScopes()
             ->where('status', 'active')
