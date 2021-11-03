@@ -65,6 +65,8 @@ class InvoiceValidateService
             ->firstOrFail();
         //Log::info($this->settings);
 
+        $financialAccountToCredit = $settings->financial_account_to_credit->code;
+
 
         $contact = Contact::findOrFail($requestInstance->contact_id);
 
@@ -122,8 +124,14 @@ class InvoiceValidateService
             //get the item
             $itemModel = Item::find($item['item_id']);
 
+            if (optional($itemModel)->selling_financial_account_code)
+            {
+                $financialAccountToCredit = $itemModel->selling_financial_account_code;
+            }
+
+
             //use item selling_financial_account_code if available and default if not
-            $financialAccountToCredit = ($itemModel) ? $itemModel->selling_financial_account_code : $settings->financial_account_to_credit->code;
+            $financialAccountToCredit = (optional($itemModel)->selling_financial_account_code) ? $itemModel->selling_financial_account_code : $settings->financial_account_to_credit->code;
 
             $data['items'][] = [
                 'tenant_id' => $data['tenant_id'],
