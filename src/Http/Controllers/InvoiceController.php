@@ -142,6 +142,8 @@ class InvoiceController extends Controller
             'taxes',
             'number_string',
             'total_in_words',
+            'payment_status',
+            'balance',
         ]);
 
         return $txn->toArray();
