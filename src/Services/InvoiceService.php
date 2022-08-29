@@ -188,7 +188,7 @@ class InvoiceService
 
             if ($Txn->status == 'approved')
             {
-                self::$errors[] = 'Approved Transaction cannot be not be edited';
+                self::$errors[] = 'Approved Invoice cannot be not be edited';
                 return false;
             }
 
@@ -290,7 +290,7 @@ class InvoiceService
 
             if ($Txn->status == 'approved')
             {
-                self::$errors[] = 'Approved Transaction cannot be not be deleted';
+                self::$errors[] = 'Approved Invoice(s) cannot be not be deleted';
                 return false;
             }
 
