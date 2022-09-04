@@ -128,12 +128,10 @@ class InvoiceService
             InvoiceLedgerService::store($data);
 
             //check status and update financial account and contact balances accordingly
-            $approval = InvoiceApprovalService::run($data);
-
             //update the status of the txn
-            if ($approval)
+            if (InvoiceApprovalService::run($data))
             {
-                $Txn->status = $data['status'];
+                $Txn->status = 'approved';
                 $Txn->balances_where_updated = 1;
                 $Txn->save();
             }
