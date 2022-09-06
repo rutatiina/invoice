@@ -155,7 +155,7 @@ class InvoiceValidateService
             //CR ledger
             $data['ledgers'][$financialAccountToCredit]['financial_account_code'] = $financialAccountToCredit;
             $data['ledgers'][$financialAccountToCredit]['effect'] = 'credit';
-            $data['ledgers'][$financialAccountToCredit]['total'] = @$data['ledgers'][$financialAccountToCredit]['total'] + $taxableAmount;
+            $data['ledgers'][$financialAccountToCredit]['total'] = @$data['ledgers'][$financialAccountToCredit]['total'] + $itemTaxableAmount;
             $data['ledgers'][$financialAccountToCredit]['contact_id'] = $data['contact_id'];
         }
 
