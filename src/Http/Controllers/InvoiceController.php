@@ -69,7 +69,7 @@ class InvoiceController extends Controller
         $txnAttributes['created_by'] = Auth::id();
         $txnAttributes['number'] = InvoiceService::nextNumber();
 
-        $txnAttributes['status'] = 'approved';
+        $txnAttributes['status'] = 'draft';
         $txnAttributes['contact_id'] = '';
         $txnAttributes['contact'] = json_decode('{"currencies":[]}'); #required
         $txnAttributes['date'] = date('Y-m-d');
@@ -249,17 +249,6 @@ class InvoiceController extends Controller
         ];
     }
 
-    public function datatables(Request $request)
-    {
-
-        $txns = Transaction::setRoute('show', route('accounting.sales.invoices.show', '_id_'))
-            ->setRoute('edit', route('accounting.sales.invoices.edit', '_id_'))
-            ->setSortBy($request->sort_by)
-            ->paginate(false);
-
-        return Datatables::of($txns)->make(true);
-    }
-
     public function exportToExcel(Request $request)
     {
 
@@ -303,6 +292,31 @@ class InvoiceController extends Controller
         //$books->load('author', 'publisher'); //of no use
 
         return $export;
+    }
+
+    public function routes()
+    {
+        return [
+            'cancel' => route('invoice.cancel'),
+        ];
+    }
+
+    public function cancel(Request $request)
+    {
+        if (InvoiceService::cancelMany($request->ids))
+        {
+            return [
+                'status' => true,
+                'messages' => [count($request->ids) . ' Invoice(s) canceled.'],
+            ];
+        }
+        else
+        {
+            return [
+                'status' => false,
+                'messages' => InvoiceService::$errors
+            ];
+        }
     }
 
 }

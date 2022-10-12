@@ -336,6 +336,60 @@ class InvoiceService
         }
     }
 
+    public static function cancel($id)
+    {
+        //start database transaction
+        DB::connection('tenant')->beginTransaction();
+
+        try
+        {
+            $Txn = Invoice::with('items', 'ledgers')->findOrFail($id);
+
+            if ($Txn->status != 'approved')
+            {
+                self::$errors[] = 'Only approved Invoice(s) can be canceled';
+                return false;
+            }
+
+            //reverse the account balances
+            AccountBalanceUpdateService::doubleEntry($Txn, true);
+
+            //reverse the contact balances
+            ContactBalanceUpdateService::doubleEntry($Txn, true);
+
+            $Txn->status = 'canceled';
+            $Txn->canceled = 1;
+            $Txn->save();
+
+            DB::connection('tenant')->commit();
+
+            return true;
+
+        }
+        catch (\Throwable $e)
+        {
+            DB::connection('tenant')->rollBack();
+
+            Log::critical('Fatal Internal Error: Failed to cancel invoice from database');
+            Log::critical($e);
+
+            //print_r($e); exit;
+            if (App::environment('local'))
+            {
+                self::$errors[] = 'Error: Failed to cancel invoice from database.';
+                self::$errors[] = 'File: ' . $e->getFile();
+                self::$errors[] = 'Line: ' . $e->getLine();
+                self::$errors[] = 'Message: ' . $e->getMessage();
+            }
+            else
+            {
+                self::$errors[] = 'Fatal Internal Error: Failed to cancel invoice from database. Please contact Admin';
+            }
+
+            return false;
+        }
+    }
+
     public static function copy($id)
     {
         $taxes = Tax::all()->keyBy('code');
@@ -438,6 +492,15 @@ class InvoiceService
 
             return false;
         }
+    }
+
+    public static function cancelMany($ids)
+    {
+        foreach($ids as $id)
+        {
+            if(!self::cancel($id)) return false;
+        }
+        return true;
     }
 
 }

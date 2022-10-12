@@ -221,4 +221,12 @@ class Invoice extends Model
         return $grouped;
     }
 
+    //always return 0 if db value is 0.0000
+    public function getTotalPaidAttribute($value)
+    {
+        if (!is_numeric($value)) return 0;
+        
+        return floatval($value);
+    }
+
 }
