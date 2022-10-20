@@ -233,4 +233,12 @@ class Invoice extends Model
         return floatval($value);
     }
 
+    //always return 0 if db value is 0.0000
+    public function getDiscountPercentageAttribute($value)
+    {
+        if (!is_numeric($value)) return 0;
+        
+        return floatval($value);
+    }
+
 }

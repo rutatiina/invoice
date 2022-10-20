@@ -109,6 +109,8 @@ class InvoiceService
             $Txn->exchange_rate = $data['exchange_rate'];
             $Txn->taxable_amount = $data['taxable_amount'];
             $Txn->total = $data['total'];
+            $Txn->discount = $data['discount'];
+            $Txn->discount_percentage = $data['discount_percentage'];
             $Txn->branch_id = $data['branch_id'];
             $Txn->store_id = $data['store_id'];
             $Txn->due_date = $data['due_date'];

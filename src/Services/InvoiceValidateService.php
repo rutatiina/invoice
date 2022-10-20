@@ -35,6 +35,7 @@ class InvoiceValidateService
             'due_date' => 'date|nullable',
             'salesperson_contact_id' => 'numeric|nullable',
             'memo' => 'string|nullable',
+            'discount' => 'numeric|nullable',
 
             'items' => 'required|array',
             'items.*.name' => 'required_without:item_id',
@@ -97,6 +98,8 @@ class InvoiceValidateService
         $data['terms_and_conditions'] = $requestInstance->input('terms_and_conditions', null);
         $data['contact_notes'] = $requestInstance->input('contact_notes', null);
         $data['status'] = strtolower($requestInstance->input('status', null));
+        $data['discount'] = $requestInstance->input('discount', 0);
+        $data['discount_percentage'] = $requestInstance->input('discount_percentage', 0);
         $data['balances_where_updated'] = 0;
 
 
@@ -111,8 +114,8 @@ class InvoiceValidateService
             $itemTaxes = $requestInstance->input('items.'.$key.'.taxes', []);
 
             $txnTotal           += ($item['rate']*$item['quantity']);
-            $taxableAmount      += ($item['rate']*$item['quantity']);
-            $itemTaxableAmount   = ($item['rate']*$item['quantity']); //calculate the item taxable amount
+            $taxableAmount      += ($item['rate']*$item['quantity']) * ((100-$data['discount_percentage']) / 100);
+            $itemTaxableAmount   = ($item['rate']*$item['quantity']) * ((100-$data['discount_percentage']) / 100); //calculate the item taxable amount
 
             foreach ($itemTaxes as $itemTax)
             {
@@ -160,7 +163,7 @@ class InvoiceValidateService
         }
 
         $data['taxable_amount'] = $taxableAmount;
-        $data['total'] = $txnTotal;
+        $data['total'] = $txnTotal - $data['discount'];
 
 
         //DR ledger
