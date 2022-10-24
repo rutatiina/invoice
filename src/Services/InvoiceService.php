@@ -108,6 +108,7 @@ class InvoiceService
             $Txn->quote_currency = $data['quote_currency'];
             $Txn->exchange_rate = $data['exchange_rate'];
             $Txn->taxable_amount = $data['taxable_amount'];
+            $Txn->sub_total = $data['sub_total'];
             $Txn->total = $data['total'];
             $Txn->discount = $data['discount'];
             $Txn->discount_percentage = $data['discount_percentage'];

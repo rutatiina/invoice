@@ -104,6 +104,7 @@ class InvoiceValidateService
 
 
         //set the transaction total to zero
+        $txnSubTotal = 0;
         $txnTotal = 0;
         $taxableAmount = 0;
 
@@ -113,6 +114,7 @@ class InvoiceValidateService
         {
             $itemTaxes = $requestInstance->input('items.'.$key.'.taxes', []);
 
+            $txnSubTotal        += $item['total'];
             $txnTotal           += ($item['rate']*$item['quantity']);
             $taxableAmount      += ($item['rate']*$item['quantity']) * ((100-$data['discount_percentage']) / 100);
             $itemTaxableAmount   = ($item['rate']*$item['quantity']) * ((100-$data['discount_percentage']) / 100); //calculate the item taxable amount
@@ -163,6 +165,7 @@ class InvoiceValidateService
         }
 
         $data['taxable_amount'] = $taxableAmount;
+        $data['sub_total'] = $txnSubTotal;
         $data['total'] = $txnTotal - $data['discount'];
 
 

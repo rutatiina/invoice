@@ -42,6 +42,7 @@ class CreateRgInvoicesTable extends Migration
             $table->string('quote_currency', 3);
             $table->unsignedDecimal('exchange_rate', 20,10);
             $table->unsignedDecimal('taxable_amount', 20,5);
+            $table->unsignedDecimal('sub_total', 20, 5);
             $table->unsignedDecimal('total', 20, 5);
             $table->unsignedDecimal('total_paid', 20, 5)->default(0);
             $table->boolean('balances_where_updated')->default(0);
