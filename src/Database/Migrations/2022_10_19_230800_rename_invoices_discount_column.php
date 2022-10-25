@@ -41,7 +41,7 @@ class RenameInvoicesDiscountColumn extends Migration
         }
 
         Schema::connection('tenant')->table('rg_invoices', function (Blueprint $table) {
-            $table->removeColumn('discount_percentage');
+            $table->dropColumn('discount_percentage');
         });
     }
 }

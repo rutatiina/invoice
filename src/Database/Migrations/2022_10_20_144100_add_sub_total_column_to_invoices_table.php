@@ -26,7 +26,7 @@ class AddSubTotalColumnToInvoicesTable extends Migration
     public function down()
     {
         Schema::connection('tenant')->table('rg_invoices', function (Blueprint $table) {
-            $table->removeColumn('sub_total');
+            $table->dropColumn('sub_total');
         });
     }
 }
