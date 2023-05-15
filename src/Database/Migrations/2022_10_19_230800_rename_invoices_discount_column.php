@@ -21,7 +21,7 @@ class RenameInvoicesDiscountColumn extends Migration
         }
 
         Schema::connection('tenant')->table('rg_invoices', function (Blueprint $table) {
-            $table->unsignedDecimal('discount_percentage', 42, 38)->nullable()->default(0)->after('discount');
+            $table->unsignedDecimal('discount_percentage', 20, 5)->nullable()->default(0)->after('discount');
         });
     
     }
