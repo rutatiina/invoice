@@ -2,15 +2,16 @@
 
 namespace Rutatiina\Invoice\Services;
 
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
+use Rutatiina\Tax\Models\Tax;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Rutatiina\Invoice\Models\Invoice;
+use Rutatiina\Invoice\Models\InvoiceSetting;
+use Rutatiina\FinancialAccounting\Services\ItemBalanceUpdateService;
 use Rutatiina\FinancialAccounting\Services\AccountBalanceUpdateService;
 use Rutatiina\FinancialAccounting\Services\ContactBalanceUpdateService;
-use Rutatiina\Invoice\Models\InvoiceSetting;
-use Rutatiina\Tax\Models\Tax;
 
 class InvoiceService
 {
@@ -206,6 +207,9 @@ class InvoiceService
             //reverse the contact balances
             ContactBalanceUpdateService::doubleEntry($Txn->toArray(), true);
 
+            //Update the item balances
+            ItemBalanceUpdateService::entry($Txn->toArray(), true);
+
             $Txn->tenant_id = $data['tenant_id'];
             $Txn->created_by = Auth::id();
             $Txn->document_name = $data['document_name'];
@@ -308,6 +312,9 @@ class InvoiceService
             //reverse the contact balances
             ContactBalanceUpdateService::doubleEntry($Txn, true);
 
+            //Update the item balances
+            ItemBalanceUpdateService::entry($Txn, true);
+
             $Txn->delete();
 
             DB::connection('tenant')->commit();
@@ -359,6 +366,9 @@ class InvoiceService
 
             //reverse the contact balances
             ContactBalanceUpdateService::doubleEntry($Txn, true);
+
+            //Update the item balances
+            ItemBalanceUpdateService::entry($Txn, true);
 
             $Txn->status = 'canceled';
             $Txn->canceled = 1;

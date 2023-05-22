@@ -142,7 +142,7 @@ class InvoiceValidateService
                 'tenant_id' => $data['tenant_id'],
                 'created_by' => $data['created_by'],
                 'contact_id' => $item['contact_id'],
-                'item_id' => $item['item_id'],
+                'item_id' => optional($itemModel)->id, //$item['item_id'], use internal ID to verify data so that from here one the item_id value is LEGIT
                 'credit_financial_account_code' => $financialAccountToCredit,
                 'name' => $item['name'],
                 'description' => $item['description'],
