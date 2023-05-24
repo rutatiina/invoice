@@ -129,7 +129,7 @@ class InvoiceService
             //Save the items >> $data['items']
             InvoiceItemService::store($data);
 
-            $Txn = $Txn->refresh();
+            $Txn->refresh();
 
             //check status and update financial account and contact balances accordingly
             //update the status of the txn
@@ -239,7 +239,7 @@ class InvoiceService
             //Save the items >> $data['items']
             InvoiceItemService::store($data);
 
-            $Txn = $Txn->refresh();
+            $Txn->refresh();
 
             //check status and update financial account and contact balances accordingly
             $approval = InvoiceApprovalService::run($Txn);
