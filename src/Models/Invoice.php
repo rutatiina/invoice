@@ -44,6 +44,7 @@ class Invoice extends Model
         'total_in_words',
         'payment_status',
         'balance',
+        'ledgers'
     ];
 
     /**
@@ -61,10 +62,10 @@ class Invoice extends Model
              $txn->items()->each(function($row) {
                 $row->delete();
              });
-             $txn->comments()->each(function($row) {
+             $txn->item_taxes()->each(function($row) {
                 $row->delete();
              });
-             $txn->ledgers()->each(function($row) {
+             $txn->comments()->each(function($row) {
                 $row->delete();
              });
         });
@@ -73,10 +74,10 @@ class Invoice extends Model
              $txn->items()->each(function($row) {
                 $row->restore();
              });
-             $txn->comments()->each(function($row) {
+             $txn->item_taxes()->each(function($row) {
                 $row->restore();
              });
-             $txn->ledgers()->each(function($row) {
+             $txn->comments()->each(function($row) {
                 $row->restore();
              });
         });
@@ -109,7 +110,6 @@ class Invoice extends Model
         $attributes['debit_account'] = [];
         $attributes['credit_account'] = [];
         $attributes['items'] = [];
-        $attributes['ledgers'] = [];
         $attributes['comments'] = [];
         $attributes['debit_contact'] = [];
         $attributes['credit_contact'] = [];
@@ -179,9 +179,45 @@ class Invoice extends Model
         return $this->hasMany('Rutatiina\Invoice\Models\InvoiceItem', 'invoice_id')->orderBy('id', 'asc');
     }
 
-    public function ledgers()
+    public function getLedgersAttribute($txn = null)
     {
-        return $this->hasMany('Rutatiina\Invoice\Models\InvoiceLedger', 'invoice_id')->orderBy('id', 'asc');
+        // if (!$txn) $this->items;
+
+        $txn = $txn ?? $this;
+
+        $txn = (is_object($txn)) ? $txn : collect($txn);
+        
+        $ledgers = [];
+
+        foreach ($txn->items as $item)
+        {
+            $taxable_amount = $item->taxable_amount ?? $item->total;
+            //CR ledger
+            $ledgers[$item->credit_financial_account_code]['financial_account_code'] = $item->credit_financial_account_code;
+            $ledgers[$item->credit_financial_account_code]['effect'] = 'credit';
+            $ledgers[$item->credit_financial_account_code]['total'] = @$ledgers[$item->credit_financial_account_code]['total'] + $taxable_amount;
+            $ledgers[$item->credit_financial_account_code]['contact_id'] = $txn->contact_id;
+        }
+
+        //DR ledger
+        $ledgers[] = [
+            'financial_account_code' => $txn->debit_financial_account_code,
+            'effect' => 'debit',
+            'total' => $txn->total,
+            'contact_id' => $txn->contact_id
+        ];
+
+        foreach ($ledgers as &$ledger)
+        {
+            $ledger['tenant_id'] = $txn->tenant_id;
+            $ledger['date'] = $txn->date;
+            $ledger['base_currency'] = $txn->base_currency;
+            $ledger['quote_currency'] = $txn->quote_currency;
+            $ledger['exchange_rate'] = $txn->exchange_rate;
+        }
+        unset($ledger);
+
+        return collect($ledgers);
     }
 
     public function comments()

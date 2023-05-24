@@ -129,12 +129,11 @@ class InvoiceService
             //Save the items >> $data['items']
             InvoiceItemService::store($data);
 
-            //Save the ledgers >> $data['ledgers']; and update the balances
-            InvoiceLedgerService::store($data);
+            $Txn = $Txn->refresh();
 
             //check status and update financial account and contact balances accordingly
             //update the status of the txn
-            if (InvoiceApprovalService::run($data))
+            if (InvoiceApprovalService::run($Txn))
             {
                 $Txn->status = 'approved';
                 $Txn->balances_where_updated = 1;
@@ -187,7 +186,7 @@ class InvoiceService
 
         try
         {
-            $Txn = Invoice::with('items', 'ledgers')->findOrFail($data['id']);
+            $Txn = Invoice::with('items')->findOrFail($data['id']);
 
             if ($Txn->status == 'approved')
             {
@@ -196,7 +195,6 @@ class InvoiceService
             }
 
             //Delete affected relations
-            $Txn->ledgers()->delete();
             $Txn->items()->delete();
             $Txn->item_taxes()->delete();
             $Txn->comments()->delete();
@@ -241,11 +239,10 @@ class InvoiceService
             //Save the items >> $data['items']
             InvoiceItemService::store($data);
 
-            //Save the ledgers >> $data['ledgers']; and update the balances
-            InvoiceLedgersService::store($data);
+            $Txn = $Txn->refresh();
 
             //check status and update financial account and contact balances accordingly
-            $approval = InvoiceApprovalService::run($data);
+            $approval = InvoiceApprovalService::run($Txn);
 
             //update the status of the txn
             if ($approval)
@@ -292,19 +289,13 @@ class InvoiceService
 
         try
         {
-            $Txn = Invoice::with('items', 'ledgers')->findOrFail($id);
+            $Txn = Invoice::with('items')->findOrFail($id);
 
             if ($Txn->status == 'approved')
             {
                 self::$errors[] = 'Approved Invoice(s) cannot be not be deleted';
                 return false;
             }
-
-            //Delete affected relations
-            $Txn->ledgers()->delete();
-            $Txn->items()->delete();
-            $Txn->item_taxes()->delete();
-            $Txn->comments()->delete();
 
             //reverse the account balances
             AccountBalanceUpdateService::doubleEntry($Txn, true);
@@ -353,7 +344,7 @@ class InvoiceService
 
         try
         {
-            $Txn = Invoice::with('items', 'ledgers')->findOrFail($id);
+            $Txn = Invoice::with('items')->findOrFail($id);
 
             if ($Txn->status != 'approved')
             {
@@ -456,7 +447,7 @@ class InvoiceService
 
     public static function approve($id)
     {
-        $Txn = Invoice::with(['ledgers'])->findOrFail($id);
+        $Txn = Invoice::findOrFail($id);
 
         if (!in_array($Txn->status, config('financial-accounting.approvable_status')))
         {

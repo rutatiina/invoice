@@ -9,14 +9,14 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Request as FacadesRequest;
 use Rutatiina\Invoice\Models\Invoice;
-use Rutatiina\Item\Traits\ItemsSelect2DataTrait;
+// use Rutatiina\Item\Traits\ItemsSelect2DataTrait;
 use Rutatiina\Contact\Traits\ContactTrait;
 use Yajra\DataTables\Facades\DataTables;
 
 class InvoiceController extends Controller
 {
     use ContactTrait;
-    use ItemsSelect2DataTrait;
+    // use ItemsSelect2DataTrait;
 
     public function __construct()
     {
@@ -137,13 +137,14 @@ class InvoiceController extends Controller
         }
 
         $txn = Invoice::findOrFail($id);
-        $txn->load('contact', 'items.taxes', 'ledgers');
+        $txn->load('contact', 'items.taxes');
         $txn->setAppends([
             'taxes',
             'number_string',
             'total_in_words',
             'payment_status',
             'balance',
+            'ledgers'
         ]);
 
         return $txn->toArray();
