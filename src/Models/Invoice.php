@@ -191,11 +191,10 @@ class Invoice extends Model
 
         foreach ($txn->items as $item)
         {
-            $taxable_amount = $item->taxable_amount ?? $item->total;
             //CR ledger
             $ledgers[$item->credit_financial_account_code]['financial_account_code'] = $item->credit_financial_account_code;
             $ledgers[$item->credit_financial_account_code]['effect'] = 'credit';
-            $ledgers[$item->credit_financial_account_code]['total'] = @$ledgers[$item->credit_financial_account_code]['total'] + $taxable_amount;
+            $ledgers[$item->credit_financial_account_code]['total'] = ($ledgers[$item->credit_financial_account_code]['total'] ?? 0) + $item->taxable_amount;
             $ledgers[$item->credit_financial_account_code]['contact_id'] = $txn->contact_id;
         }
 
